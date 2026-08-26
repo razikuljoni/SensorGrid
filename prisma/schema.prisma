@@ -1,0 +1,390 @@
+// Nexora Pulse — Prisma Schema
+// IoT Device Intelligence & Automation Platform
+// Adapted for SQLite (sandbox). Enums are represented as String for portability.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Identity & Multi-Tenancy
+// ---------------------------------------------------------------------------
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  plan      String   @default("FREE") // FREE | STARTER | PRO | ENTERPRISE
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members      OrganizationMember[]
+  locations    Location[]
+  devices      Device[]
+  automations  Automation[]
+  alertRules   AlertRule[]
+  alertEvents  AlertEvent[]
+  notifications Notification[]
+  auditLogs    AuditLog[]
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  name          String
+  passwordHash  String?
+  avatarUrl     String?
+  role          String   @default("OWNER") // global role for demo
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  memberships   OrganizationMember[]
+  notifications Notification[]
+  commands      Command[]
+  auditLogs     AuditLog[]
+}
+
+model OrganizationMember {
+  id              String   @id @default(cuid())
+  organizationId  String
+  userId          String
+  role            String   @default("ENGINEER") // OWNER | ADMIN | ENGINEER | OPERATOR | VIEWER
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+}
+
+model Invitation {
+  id              String   @id @default(cuid())
+  organizationId  String
+  email           String
+  role            String   @default("VIEWER")
+  token           String   @unique
+  status          String   @default("PENDING") // PENDING | ACCEPTED | REVOKED
+  expiresAt       DateTime
+  createdAt       DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Locations & Zones (hierarchical)
+// ---------------------------------------------------------------------------
+
+model Location {
+  id              String   @id @default(cuid())
+  organizationId  String
+  name            String
+  parentId        String?
+  type            String   @default("ZONE") // SITE | FLOOR | ROOM | ZONE
+  metadata        String   @default("{}") // JSON
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  devices         Device[]
+  parent          Location?  @relation("LocationTree", fields: [parentId], references: [id])
+  children        Location[] @relation("LocationTree")
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId])
+}
+
+// ---------------------------------------------------------------------------
+// Devices & Digital Twin
+// ---------------------------------------------------------------------------
+
+model Device {
+  id              String   @id @default(cuid())
+  organizationId  String
+  locationId      String?
+  name            String
+  type            String   @default("ESP32") // ESP32 | RPI | ARDUINO | GENERIC | GATEWAY
+  status          String   @default("OFFLINE") // ONLINE | OFFLINE | SLEEPING | WARNING | CRITICAL | MAINTENANCE | UNKNOWN
+  health          String   @default("UNKNOWN") // HEALTHY | DEGRADED | WARNING | CRITICAL | OFFLINE | UNKNOWN
+  firmwareVersion String?
+  ipAddress       String?
+  macAddress      String?
+  battery         Float?   // 0-100
+  signal          Int?     // RSSI dBm
+  lastSeen        DateTime?
+  lastHeartbeat   DateTime?
+  tags            String   @default("[]") // JSON array of strings
+  notes           String?
+  metadata        String   @default("{}") // JSON
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  location        Location?    @relation(fields: [locationId], references: [id])
+  credential      DeviceCredential?
+  twin            DeviceTwin?
+  sensors         Sensor[]
+  telemetry       Telemetry[]
+  commands        Command[]
+  alertEvents     AlertEvent[]
+  alertRules      AlertRule[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId, status])
+  @@index([locationId])
+}
+
+model DeviceCredential {
+  id           String   @id @default(cuid())
+  deviceId     String   @unique
+  username     String   @unique
+  password     String
+  clientId     String   @unique
+  revokedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  device       Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+}
+
+model DeviceTwin {
+  id           String   @id @default(cuid())
+  deviceId     String   @unique
+  desired      String   @default("{}") // JSON desired state
+  reported     String   @default("{}") // JSON reported state
+  version      Int      @default(1)
+  updatedAt    DateTime @updatedAt
+
+  device       Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+}
+
+model Sensor {
+  id           String   @id @default(cuid())
+  deviceId     String
+  key          String   // e.g. "temperature", "humidity", "pressure"
+  label        String
+  unit         String   // °C, %, hPa, lux, ppm
+  dataType     String   @default("number") // number | boolean | string | json
+  min          Float?
+  max          Float?
+  metadata     String   @default("{}")
+
+  device       Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  telemetry    Telemetry[]
+
+  createdAt    DateTime @default(now())
+
+  @@unique([deviceId, key])
+  @@index([deviceId])
+}
+
+// ---------------------------------------------------------------------------
+// Telemetry (time-series)
+// ---------------------------------------------------------------------------
+
+model Telemetry {
+  id           String   @id @default(cuid())
+  deviceId     String
+  sensorId     String?
+  sensorKey    String   // denormalized for fast queries
+  value        Float
+  unit         String
+  quality      String   @default("GOOD") // GOOD | ESTIMATED | INVALID | MISSING
+  metadata     String   @default("{}")
+  timestamp    DateTime @default(now())
+
+  device       Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  sensor       Sensor?  @relation(fields: [sensorId], references: [id], onDelete: SetNull)
+
+  @@index([deviceId, sensorKey, timestamp])
+  @@index([deviceId, timestamp])
+}
+
+model TelemetryAggregate {
+  id           String   @id @default(cuid())
+  deviceId     String
+  sensorKey    String
+  bucket       String   // hour | day
+  bucketStart  DateTime
+  avg          Float
+  min          Float
+  max          Float
+  count        Int
+  updatedAt    DateTime @updatedAt
+
+  @@unique([deviceId, sensorKey, bucket, bucketStart])
+  @@index([deviceId, sensorKey, bucketStart])
+}
+
+// ---------------------------------------------------------------------------
+// Commands
+// ---------------------------------------------------------------------------
+
+model Command {
+  id           String   @id @default(cuid())
+  deviceId     String
+  userId       String?
+  senderName   String
+  payload      String   @default("{}") // JSON
+  topic        String
+  status       String   @default("PENDING") // PENDING | SENT | ACKNOWLEDGED | COMPLETED | FAILED | TIMEOUT
+  result       String?  // JSON response from device
+  error        String?
+  attempts     Int      @default(0)
+  createdAt    DateTime @default(now())
+  sentAt      DateTime?
+  acknowledgedAt DateTime?
+  completedAt  DateTime?
+
+  device       Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([deviceId, createdAt])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Automations
+// ---------------------------------------------------------------------------
+
+model Automation {
+  id              String   @id @default(cuid())
+  organizationId  String
+  name            String
+  description     String?
+  enabled         Boolean  @default(true)
+  version         Int      @default(1)
+  triggerType     String   // TELEMETRY | DEVICE_ONLINE | DEVICE_OFFLINE | SCHEDULE | MANUAL
+  triggerConfig   String   @default("{}") // JSON
+  nodes           String   @default("[]") // JSON: React Flow nodes
+  edges           String   @default("[]") // JSON: React Flow edges
+  lastExecutedAt  DateTime?
+  executionCount  Int      @default(0)
+  failureCount    Int      @default(0)
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  executions      AutomationExecution[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId, enabled])
+}
+
+model AutomationExecution {
+  id              String   @id @default(cuid())
+  automationId    String
+  status          String   @default("RUNNING") // RUNNING | COMPLETED | FAILED | TIMEOUT
+  trigger         String   @default("{}") // JSON trigger context
+  logs            String   @default("[]") // JSON array of log entries
+  error           String?
+  startedAt       DateTime @default(now())
+  completedAt     DateTime?
+
+  automation      Automation @relation(fields: [automationId], references: [id], onDelete: Cascade)
+
+  @@index([automationId, startedAt])
+  @@index([status])
+}
+
+// ---------------------------------------------------------------------------
+// Alerts
+// ---------------------------------------------------------------------------
+
+model AlertRule {
+  id              String   @id @default(cuid())
+  organizationId  String
+  deviceId        String?
+  sensorKey       String?
+  name            String
+  description     String?
+  condition       String   // GT | LT | GTE | LTE | EQ | NEQ | OFFLINE_FOR | BATTERY_BELOW
+  threshold       Float?
+  severity        String   @default("WARNING") // INFO | WARNING | CRITICAL
+  enabled         Boolean  @default(true)
+  cooldownSeconds Int      @default(300)
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  device          Device?      @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  events          AlertEvent[]
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([organizationId, enabled])
+  @@index([deviceId])
+}
+
+model AlertEvent {
+  id              String   @id @default(cuid())
+  organizationId  String
+  ruleId          String?
+  deviceId        String?
+  ruleName        String
+  severity        String   @default("WARNING")
+  status          String   @default("TRIGGERED") // NORMAL | TRIGGERED | ACKNOWLEDGED | RESOLVED
+  message         String
+  context         String   @default("{}") // JSON
+  triggeredAt     DateTime @default(now())
+  acknowledgedAt  DateTime?
+  acknowledgedBy  String?
+  resolvedAt      DateTime?
+  createdAt       DateTime @default(now())
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  rule            AlertRule?   @relation(fields: [ruleId], references: [id], onDelete: SetNull)
+  device          Device?      @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, status, createdAt])
+  @@index([deviceId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Notifications
+// ---------------------------------------------------------------------------
+
+model Notification {
+  id              String   @id @default(cuid())
+  userId          String?
+  organizationId  String
+  category        String   @default("SYSTEM") // DEVICE | ALERT | AUTOMATION | SYSTEM | SECURITY
+  title           String
+  message         String
+  read            Boolean  @default(false)
+  metadata        String   @default("{}")
+  createdAt       DateTime @default(now())
+
+  user            User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
+  @@index([organizationId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Audit Log
+// ---------------------------------------------------------------------------
+
+model AuditLog {
+  id              String   @id @default(cuid())
+  organizationId  String
+  actorId         String?
+  actorName       String
+  action          String   // device.create, device.command, automation.execute, etc.
+  targetType      String   // DEVICE | AUTOMATION | ALERT | ORGANIZATION | USER | COMMAND
+  targetId        String?
+  targetName      String?
+  metadata        String   @default("{}")
+  ipAddress       String?
+  createdAt       DateTime @default(now())
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user            User?         @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId, createdAt])
+  @@index([action])
+}
