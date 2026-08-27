@@ -1,4 +1,4 @@
-// Nexora Pulse — Prisma Schema
+// SensorGrid — Prisma Schema
 // IoT Device Intelligence & Automation Platform
 // Adapted for SQLite (sandbox). Enums are represented as String for portability.
 

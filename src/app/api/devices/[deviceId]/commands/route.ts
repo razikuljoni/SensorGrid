@@ -32,7 +32,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ deviceId: 
       deviceId,
       senderName: DEMO_USER_NAME,
       payload: JSON.stringify(payload),
-      topic: `nexora/nexora-hq/${deviceId}/command`,
+      topic: `sensorgrid/sensorgrid-hq/${deviceId}/command`,
       status: 'PENDING',
     },
   })

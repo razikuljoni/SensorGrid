@@ -175,9 +175,9 @@ function safeParse<T>(json: string | null | undefined, fallback: T): T {
 }
 
 // ─── Org context (single demo org for this MVP) ───────────────────────────────
-export const DEMO_ORG_ID = 'org-nexora-hq'
-export const DEMO_USER_ID = 'user-pulse'
-export const DEMO_USER_NAME = 'Pulse Operator'
+export const DEMO_ORG_ID = 'org-sensorgrid-hq'
+export const DEMO_USER_ID = 'user-sensorgrid'
+export const DEMO_USER_NAME = 'SensorGrid Operator'
 
 export async function getOrgContext(_req: NextRequest) {
   // In a real app this would decode the session cookie and resolve the user's

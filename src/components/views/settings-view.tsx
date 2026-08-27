@@ -23,7 +23,7 @@ export function SettingsView() {
           <CardTitle className="text-base flex items-center gap-2">
             <MapPin className="size-4" /> Organization
           </CardTitle>
-          <CardDescription>Your Nexora Pulse workspace</CardDescription>
+          <CardDescription>Your SensorGrid workspace</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {isLoading || !org ? (

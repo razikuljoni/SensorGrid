@@ -1,4 +1,4 @@
-// Nexora Pulse — Database seed
+// SensorGrid — Database seed
 // Seeds a demo organization, user, locations, devices with sensors, twin state,
 // automations, alert rules, and an initial activity log.
 // Run with: bun run scripts/seed.ts
@@ -7,11 +7,11 @@ import { PrismaClient } from '@prisma/client'
 
 const db = new PrismaClient()
 
-const ORG_SLUG = 'nexora-hq'
-const DEMO_USER_EMAIL = 'pulse@nexora.dev'
+const ORG_SLUG = 'sensorgrid-hq'
+const DEMO_USER_EMAIL = 'operator@sensorgrid.dev'
 
 const LOCATIONS = [
-  { id: 'loc-site', name: 'Nexora HQ', type: 'SITE', parentId: null },
+  { id: 'loc-site', name: 'SensorGrid HQ', type: 'SITE', parentId: null },
   { id: 'loc-ground', name: 'Ground Floor', type: 'FLOOR', parentId: 'loc-site' },
   { id: 'loc-living', name: 'Living Room', type: 'ROOM', parentId: 'loc-ground' },
   { id: 'loc-kitchen', name: 'Kitchen', type: 'ROOM', parentId: 'loc-ground' },
@@ -216,7 +216,7 @@ const DEVICES: DeviceSeed[] = [
 ]
 
 async function main() {
-  console.log('Seeding Nexora Pulse database...')
+  console.log('Seeding SensorGrid database...')
 
   // Clear existing telemetry (idempotent re-runs)
   await db.telemetry.deleteMany({})
@@ -228,17 +228,17 @@ async function main() {
 
   const org = await db.organization.upsert({
     where: { slug: ORG_SLUG },
-    update: { name: 'Nexora HQ', plan: 'PRO' },
-    create: { id: 'org-nexora-hq', name: 'Nexora HQ', slug: ORG_SLUG, plan: 'PRO' },
+    update: { name: 'SensorGrid HQ', plan: 'PRO' },
+    create: { id: 'org-sensorgrid-hq', name: 'SensorGrid HQ', slug: ORG_SLUG, plan: 'PRO' },
   })
 
   const user = await db.user.upsert({
     where: { email: DEMO_USER_EMAIL },
-    update: { name: 'Pulse Operator', role: 'OWNER' },
+    update: { name: 'SensorGrid Operator', role: 'OWNER' },
     create: {
-      id: 'user-pulse',
+      id: 'user-sensorgrid',
       email: DEMO_USER_EMAIL,
-      name: 'Pulse Operator',
+      name: 'SensorGrid Operator',
       passwordHash: '$argon2id$demo$placeholder',
       role: 'OWNER',
     },
@@ -434,7 +434,7 @@ async function main() {
     { category: 'ALERT', title: 'Critical Server Temperature', message: 'Server room gateway reached 67.4C (threshold 60C).' },
     { category: 'DEVICE', title: 'Garage Device Offline', message: 'Garage Door Controller has been offline for 2 hours.' },
     { category: 'AUTOMATION', title: 'Smart Cooling Executed', message: 'Living room fan activated due to temperature threshold.' },
-    { category: 'SYSTEM', title: 'Welcome to Nexora Pulse', message: 'Your demo workspace is ready. Connect a device to begin.' },
+    { category: 'SYSTEM', title: 'Welcome to SensorGrid', message: 'Your demo workspace is ready. Connect a device to begin.' },
   ]
   for (const n of notifs) {
     await db.notification.create({
@@ -443,10 +443,10 @@ async function main() {
   }
 
   const audits = [
-    { action: 'device.create', targetType: 'DEVICE', targetId: 'dev-server-gateway', targetName: 'Server Room Gateway', actorName: 'Pulse Operator', metadata: { type: 'GATEWAY' } },
-    { action: 'automation.create', targetType: 'AUTOMATION', targetId: 'auto-cooling', targetName: 'Smart Cooling', actorName: 'Pulse Operator', metadata: {} },
-    { action: 'alert.acknowledge', targetType: 'ALERT', targetId: null, targetName: 'Garage Device Offline', actorName: 'Pulse Operator', metadata: {} },
-    { action: 'device.command', targetType: 'COMMAND', targetId: null, targetName: 'Living Room ESP32', actorName: 'Pulse Operator', metadata: { payload: { fan: true } } },
+    { action: 'device.create', targetType: 'DEVICE', targetId: 'dev-server-gateway', targetName: 'Server Room Gateway', actorName: 'SensorGrid Operator', metadata: { type: 'GATEWAY' } },
+    { action: 'automation.create', targetType: 'AUTOMATION', targetId: 'auto-cooling', targetName: 'Smart Cooling', actorName: 'SensorGrid Operator', metadata: {} },
+    { action: 'alert.acknowledge', targetType: 'ALERT', targetId: null, targetName: 'Garage Device Offline', actorName: 'SensorGrid Operator', metadata: {} },
+    { action: 'device.command', targetType: 'COMMAND', targetId: null, targetName: 'Living Room ESP32', actorName: 'SensorGrid Operator', metadata: { payload: { fan: true } } },
   ]
   for (let i = 0; i < audits.length; i++) {
     const a = audits[i]
@@ -462,9 +462,9 @@ async function main() {
 
   await db.command.create({
     data: {
-      deviceId: 'dev-living-esp32', userId: user.id, senderName: 'Pulse Operator',
+      deviceId: 'dev-living-esp32', userId: user.id, senderName: 'SensorGrid Operator',
       payload: JSON.stringify({ fan: true, speed: 2 }),
-      topic: 'nexora/nexora-hq/dev-living-esp32/command',
+      topic: 'sensorgrid/sensorgrid-hq/dev-living-esp32/command',
       status: 'COMPLETED', result: JSON.stringify({ ok: true, applied: true }), attempts: 1,
       createdAt: new Date(Date.now() - 30 * 60_000), sentAt: new Date(Date.now() - 30 * 60_000),
       acknowledgedAt: new Date(Date.now() - 29 * 60_000), completedAt: new Date(Date.now() - 29 * 60_000),
@@ -472,9 +472,9 @@ async function main() {
   })
   await db.command.create({
     data: {
-      deviceId: 'dev-office-arduino', userId: user.id, senderName: 'Pulse Operator',
+      deviceId: 'dev-office-arduino', userId: user.id, senderName: 'SensorGrid Operator',
       payload: JSON.stringify({ outlet2: true }),
-      topic: 'nexora/nexora-hq/dev-office-arduino/command',
+      topic: 'sensorgrid/sensorgrid-hq/dev-office-arduino/command',
       status: 'FAILED', error: 'Device rejected payload: outlet2 not configurable while outlet3 is active.', attempts: 1,
       createdAt: new Date(Date.now() - 50 * 60_000), sentAt: new Date(Date.now() - 50 * 60_000),
     },

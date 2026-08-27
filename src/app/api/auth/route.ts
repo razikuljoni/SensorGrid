@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic'
 
 // GET /api/auth/me — return the demo user + active organization
 export async function GET() {
-  const user = await db.user.findUnique({ where: { id: 'user-pulse' } })
+  const user = await db.user.findUnique({ where: { id: 'user-sensorgrid' } })
   const org = await db.organization.findUnique({ where: { id: DEMO_ORG_ID } })
   return ok({
     user: user ? {
@@ -22,7 +22,7 @@ export async function GET() {
 
 // POST /api/auth/login — demo login (always succeeds, returns demo user context)
 export async function POST(_req: NextRequest) {
-  const user = await db.user.findUnique({ where: { id: 'user-pulse' } })
+  const user = await db.user.findUnique({ where: { id: 'user-sensorgrid' } })
   if (!user) return NextResponse.json({ error: 'Demo user missing' }, { status: 500 })
   return ok({
     user: { id: user.id, email: user.email, name: user.name, avatarUrl: user.avatarUrl, role: user.role },

@@ -24,7 +24,7 @@ export function Footer() {
           <span className="hidden sm:inline">Aether Grid design system v1.0</span>
         </div>
         <div className="flex items-center gap-3">
-          <span>Nexora Pulse · Connect. Observe. Automate.</span>
+          <span>SensorGrid · Connect. Observe. Automate.</span>
           <a href="https://github.com" target="_blank" rel="noreferrer" className="hover:text-foreground transition-colors" aria-label="GitHub">
             <Github className="size-3" />
           </a>

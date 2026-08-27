@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
   return NextResponse.json({
-    name: 'Nexora Pulse API',
+    name: 'SensorGrid API',
     version: 'v1',
     description: 'IoT Device Intelligence & Automation Platform — REST API',
     endpoints: [

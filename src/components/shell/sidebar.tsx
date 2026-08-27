@@ -38,8 +38,8 @@ import {
 import { toast } from 'sonner'
 import { useUnreadNotifications } from '@/lib/hooks'
 
-// ─── Nexora logo mark ────────────────────────────────────────────────────────
-function NexoraMark({ className }: { className?: string }) {
+// ─── SensorGrid logo mark ────────────────────────────────────────────────────────
+function SensorGridMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
       <rect x="2" y="2" width="28" height="28" rx="8" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
@@ -88,7 +88,7 @@ function UserCardDropdown({ onNavigate }: { onNavigate?: () => void }) {
       await fetch('/api/auth/logout', { method: 'POST' })
     } catch {}
     toast.success('Signed out', {
-      description: 'You have been logged out of Nexora Pulse.',
+      description: 'You have been logged out of SensorGrid.',
     })
     setView('dashboard')
   }
@@ -110,8 +110,8 @@ function UserCardDropdown({ onNavigate }: { onNavigate?: () => void }) {
             <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-medium">PO</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-medium truncate">Pulse Operator</div>
-            <div className="text-[10px] text-sidebar-foreground/50 truncate">OWNER · Nexora HQ</div>
+            <div className="text-xs font-medium truncate">SensorGrid Operator</div>
+            <div className="text-[10px] text-sidebar-foreground/50 truncate">OWNER · SensorGrid HQ</div>
           </div>
           <ChevronDown className="size-3 text-sidebar-foreground/40 shrink-0" />
         </button>
@@ -123,8 +123,8 @@ function UserCardDropdown({ onNavigate }: { onNavigate?: () => void }) {
             <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">PO</AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium truncate">Pulse Operator</p>
-            <p className="text-xs text-text-muted truncate">pulse@nexora.dev</p>
+            <p className="text-sm font-medium truncate">SensorGrid Operator</p>
+            <p className="text-xs text-text-muted truncate">operator@sensorgrid.dev</p>
           </div>
         </div>
 
@@ -133,7 +133,7 @@ function UserCardDropdown({ onNavigate }: { onNavigate?: () => void }) {
         {/* Organization */}
         <div className="flex items-center gap-2 rounded-md px-2 py-1.5 cursor-default">
           <div className="flex size-6 items-center justify-center rounded-md bg-sidebar-primary text-[10px] font-bold text-sidebar-primary-foreground">NH</div>
-          <span className="text-sm flex-1 truncate">Nexora HQ</span>
+          <span className="text-sm flex-1 truncate">SensorGrid HQ</span>
           <Badge variant="outline" className="text-[9px]">PRO</Badge>
         </div>
 
@@ -152,7 +152,7 @@ function UserCardDropdown({ onNavigate }: { onNavigate?: () => void }) {
           onClick={() => handleNavigate('about')}
         >
           <Settings className="size-3.5 text-text-muted" />
-          About Nexora Pulse
+          About SensorGrid
         </button>
 
         <Separator className="my-1" />
@@ -182,10 +182,10 @@ export function Sidebar() {
       {/* Brand */}
       <div className="flex h-14 sm:h-16 items-center gap-2 px-3 sm:px-4 border-b border-sidebar-border shrink-0">
         <span className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shrink-0">
-          <NexoraMark className="size-5" />
+          <SensorGridMark className="size-5" />
         </span>
         <div className="leading-tight min-w-0">
-          <div className="text-sm font-semibold tracking-tight truncate">Nexora Pulse</div>
+          <div className="text-sm font-semibold tracking-tight truncate">SensorGrid</div>
           <div className="text-[10px] text-sidebar-foreground/60 truncate">IoT Intelligence</div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// Nexora Pulse — Shared Domain Types
+// SensorGrid — Shared Domain Types
 // Single source of truth used by frontend, API routes, and the realtime service.
 // (In the spec's monorepo architecture, these live in packages/types.)
 // ─────────────────────────────────────────────────────────────────────────────

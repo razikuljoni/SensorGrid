@@ -1,10 +1,10 @@
-# NEXORA PULSE
+# SENSORGRID
 
 ## IoT Device Intelligence & Automation Platform
 
 > **Connect. Observe. Automate.**
 
-Nexora Pulse is a production-grade IoT platform where users connect physical devices, receive realtime sensor telemetry, visualize historical data, control devices remotely, create automation workflows, configure alerts, and monitor entire environments from one calm, data-first dashboard.
+SensorGrid is a production-grade IoT platform where users connect physical devices, receive realtime sensor telemetry, visualize historical data, control devices remotely, create automation workflows, configure alerts, and monitor entire environments from one calm, data-first dashboard.
 
 It combines the feel of Home Assistant, ThingsBoard, Grafana dashboards, and Vercel-quality SaaS UX — without cloning any existing product.
 
@@ -87,7 +87,7 @@ The following views are available in the running application (use the Preview Pa
 
 ## Responsive Design
 
-Nexora Pulse is built **mobile-first** and is fully fluid responsive across all breakpoints.
+SensorGrid is built **mobile-first** and is fully fluid responsive across all breakpoints.
 
 ### Breakpoints
 
@@ -185,7 +185,7 @@ The realtime mini-service (`mini-services/realtime-service`) collapses the spec'
 
 ## Aether Grid Design System
 
-Aether Grid is the complete visual language of Nexora Pulse.
+Aether Grid is the complete visual language of SensorGrid.
 
 > **Data should feel alive, but never noisy.**
 
@@ -463,11 +463,11 @@ The realtime mini-service (`mini-services/realtime-service/index.ts`) replaces t
 In the full architecture, devices publish to hierarchical topics:
 
 ```
-nexora/{org}/{device}/telemetry
-nexora/{org}/{device}/state
-nexora/{org}/{device}/command
-nexora/{org}/{device}/event
-nexora/{org}/{device}/status
+sensorgrid/{org}/{device}/telemetry
+sensorgrid/{org}/{device}/state
+sensorgrid/{org}/{device}/command
+sensorgrid/{org}/{device}/event
+sensorgrid/{org}/{device}/status
 ```
 
 Example telemetry payload:
@@ -481,7 +481,7 @@ Example telemetry payload:
 }
 ```
 
-Device authentication uses per-device credentials (username/password or client certificates). The broker enforces per-device ACLs — Device A may only publish to `nexora/org1/deviceA/telemetry` and subscribe to `nexora/org1/deviceA/command`.
+Device authentication uses per-device credentials (username/password or client certificates). The broker enforces per-device ACLs — Device A may only publish to `sensorgrid/org1/deviceA/telemetry` and subscribe to `sensorgrid/org1/deviceA/command`.
 
 ### Connecting a Real ESP32
 
@@ -489,8 +489,8 @@ To connect a physical ESP32 instead of using the simulator:
 
 1. Flash firmware that connects to your MQTT broker (Mosquitto)
 2. Use the device credentials from `DeviceCredential` (visible in the device detail page)
-3. Publish telemetry to `nexora/nexora-hq/{deviceId}/telemetry`
-4. Subscribe to `nexora/nexora-hq/{deviceId}/command` for commands
+3. Publish telemetry to `sensorgrid/sensorgrid-hq/{deviceId}/telemetry`
+4. Subscribe to `sensorgrid/sensorgrid-hq/{deviceId}/command` for commands
 5. Run the MQTT gateway service that bridges broker messages → database + socket.io (this is what the realtime-service simulates)
 
 ---
@@ -545,7 +545,7 @@ All environment variables are validated at startup. Never commit `.env`.
 
 ### Current State (Demo)
 
-This sandbox deployment uses a **demo authentication model** — there is a single seeded user (`Pulse Operator` / `pulse@nexora.dev`) who is always "logged in". There is no login screen; the app loads directly into the dashboard.
+This sandbox deployment uses a **demo authentication model** — there is a single seeded user (`SensorGrid Operator` / `operator@sensorgrid.dev`) who is always "logged in". There is no login screen; the app loads directly into the dashboard.
 
 ### API Endpoints
 
@@ -563,7 +563,7 @@ This sandbox deployment uses a **demo authentication model** — there is a sing
 2. The app calls `POST /api/auth/logout`
 3. An `auth.logout` audit log entry is recorded
 4. The session cookie is cleared
-5. A success toast appears: "Signed out — You have been logged out of Nexora Pulse."
+5. A success toast appears: "Signed out — You have been logged out of SensorGrid."
 6. The view resets to the Dashboard
 
 ### Production Authentication
@@ -683,7 +683,7 @@ The realtime service tracks (visible in the dashboard):
 ## Project Structure
 
 ```
-nexora-pulse/
+sensor-grid/
 ├── src/
 │   ├── app/
 │   │   ├── api/                    # REST API routes
@@ -853,7 +853,7 @@ This sandbox deployment has the following limitations compared to the full produ
 | MQTT broker | Simulated by realtime-service | Mosquitto (real broker) |
 | Backend | Next.js API Routes | NestJS (modular monolith) |
 | Deployment | Single Next.js app | Docker Compose (web, api, worker, mqtt, postgres, redis, prometheus, grafana) |
-| Auth | Demo (always "Pulse Operator") | NextAuth.js v4 with sessions |
+| Auth | Demo (always "SensorGrid Operator") | NextAuth.js v4 with sessions |
 | Object storage | Local filesystem | S3-compatible |
 | Email | Not configured | SMTP |
 | Observability | Console logs | Sentry + OpenTelemetry + Prometheus + Grafana |
@@ -869,4 +869,4 @@ MIT — Built as a portfolio-grade demonstration of modern full-stack IoT engine
 
 ---
 
-> **Nexora Pulse** — *Connect devices. Observe everything. Automate intelligently.*
+> **SensorGrid** — *Connect devices. Observe everything. Automate intelligently.*

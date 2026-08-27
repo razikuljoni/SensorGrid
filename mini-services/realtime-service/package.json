@@ -1,5 +1,5 @@
 {
-  "name": "nexora-realtime-service",
+  "name": "sensorgrid-realtime-service",
   "version": "1.0.0",
   "private": true,
   "type": "module",

@@ -56,7 +56,7 @@ const VIEW_TITLES: Record<string, { title: string; subtitle: string }> = {
   notifications: { title: 'Notifications', subtitle: 'In-app notifications across categories' },
   activity: { title: 'Activity Log', subtitle: 'Audit trail of every important action' },
   settings: { title: 'Settings', subtitle: 'Workspace, members, and integrations' },
-  about: { title: 'About Nexora Pulse', subtitle: 'Connect. Observe. Automate.' },
+  about: { title: 'About SensorGrid', subtitle: 'Connect. Observe. Automate.' },
 }
 
 export function Header() {
@@ -89,7 +89,7 @@ export function Header() {
       await fetch('/api/auth/logout', { method: 'POST' })
     } catch {}
     toast.success('Signed out', {
-      description: 'You have been logged out of Nexora Pulse.',
+      description: 'You have been logged out of SensorGrid.',
     })
     // Reset to dashboard view
     setView('dashboard')
@@ -136,11 +136,11 @@ export function Header() {
         <PopoverTrigger asChild>
           <button className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-muted shrink-0" aria-label="User menu">
             <Avatar className="size-7">
-              <AvatarImage src="" alt="Pulse Operator" />
+              <AvatarImage src="" alt="SensorGrid Operator" />
               <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-medium">PO</AvatarFallback>
             </Avatar>
             <div className="hidden md:block text-left leading-tight">
-              <div className="text-xs font-medium">Pulse Operator</div>
+              <div className="text-xs font-medium">SensorGrid Operator</div>
               <div className="text-[10px] text-text-muted">OWNER</div>
             </div>
             <ChevronDown className="hidden md:block size-3 text-text-muted" />
@@ -150,12 +150,12 @@ export function Header() {
           {/* User identity */}
           <div className="flex items-center gap-3 px-1 py-2">
             <Avatar className="size-10">
-              <AvatarImage src="" alt="Pulse Operator" />
+              <AvatarImage src="" alt="SensorGrid Operator" />
               <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">PO</AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium truncate">Pulse Operator</p>
-              <p className="text-xs text-text-muted truncate">pulse@nexora.dev</p>
+              <p className="text-sm font-medium truncate">SensorGrid Operator</p>
+              <p className="text-xs text-text-muted truncate">operator@sensorgrid.dev</p>
             </div>
           </div>
 
@@ -164,7 +164,7 @@ export function Header() {
           {/* Organization switcher (display only) */}
           <div className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted cursor-default">
             <div className="flex size-6 items-center justify-center rounded-md bg-sidebar-primary text-[10px] font-bold text-sidebar-primary-foreground">NH</div>
-            <span className="text-sm flex-1 truncate">Nexora HQ</span>
+            <span className="text-sm flex-1 truncate">SensorGrid HQ</span>
             <Badge variant="outline" className="text-[9px]">PRO</Badge>
           </div>
 
@@ -183,7 +183,7 @@ export function Header() {
             onClick={() => { setView('about'); setUserMenuOpen(false) }}
           >
             <Info className="size-3.5 text-text-muted" />
-            About Nexora Pulse
+            About SensorGrid
           </button>
 
           <Separator className="my-1" />

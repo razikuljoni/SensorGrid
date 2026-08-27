@@ -38,7 +38,7 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
   await db.auditLog.create({
     data: {
       organizationId: DEMO_ORG_ID,
-      actorName: 'Pulse Operator',
+      actorName: 'SensorGrid Operator',
       action: 'automation.update',
       targetType: 'AUTOMATION',
       targetId: id,
@@ -57,7 +57,7 @@ export async function DELETE(_req: NextRequest, ctx: { params: Promise<{ id: str
   await db.auditLog.create({
     data: {
       organizationId: DEMO_ORG_ID,
-      actorName: 'Pulse Operator',
+      actorName: 'SensorGrid Operator',
       action: 'automation.delete',
       targetType: 'AUTOMATION',
       targetId: id,

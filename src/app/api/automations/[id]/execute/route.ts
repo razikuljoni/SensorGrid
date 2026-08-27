@@ -13,7 +13,7 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
     data: {
       automationId: id,
       status: 'COMPLETED',
-      trigger: JSON.stringify({ source: 'manual', actor: 'Pulse Operator' }),
+      trigger: JSON.stringify({ source: 'manual', actor: 'SensorGrid Operator' }),
       logs: JSON.stringify([{ ts: new Date().toISOString(), level: 'info', message: 'Manual execution triggered.' }]),
       completedAt: new Date(),
     },
@@ -25,7 +25,7 @@ export async function POST(_req: NextRequest, ctx: { params: Promise<{ id: strin
   await db.auditLog.create({
     data: {
       organizationId: DEMO_ORG_ID,
-      actorName: 'Pulse Operator',
+      actorName: 'SensorGrid Operator',
       action: 'automation.execute',
       targetType: 'AUTOMATION',
       targetId: id,

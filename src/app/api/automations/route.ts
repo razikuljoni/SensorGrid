@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   await db.auditLog.create({
     data: {
       organizationId: DEMO_ORG_ID,
-      actorName: 'Pulse Operator',
+      actorName: 'SensorGrid Operator',
       action: 'automation.create',
       targetType: 'AUTOMATION',
       targetId: automation.id,

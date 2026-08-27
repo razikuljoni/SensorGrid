@@ -1,7 +1,7 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Nexora Pulse — Dashboard View (Task 7)
+// SensorGrid — Dashboard View (Task 7)
 // Landing view showing KPI row, AtmospherePanel, device grid, signal timeline
 // and recent alerts. Driven by useDashboard() + useRealtimeNotifications().
 // ─────────────────────────────────────────────────────────────────────────────

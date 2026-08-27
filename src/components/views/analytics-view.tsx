@@ -1,7 +1,7 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Nexora Pulse — Analytics View (Task 12)
+// SensorGrid — Analytics View (Task 12)
 // Aggregated platform analytics: KPI summary + 4 charts (hourly volume,
 // per-device volume, alerts by severity, multi-series trend).
 // Driven by useAnalytics(range) + useRealtimeNotifications().

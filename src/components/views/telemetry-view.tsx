@@ -1,7 +1,7 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Nexora Pulse — Telemetry Explorer View (Task 9)
+// SensorGrid — Telemetry Explorer View (Task 9)
 // Cross-device time-series telemetry browser with live sensor tiles.
 // Driven by useDevices() + useDevice() + useDeviceTelemetry() + realtime socket.
 // ─────────────────────────────────────────────────────────────────────────────

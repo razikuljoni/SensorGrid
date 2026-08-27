@@ -35,7 +35,7 @@ export function AboutView() {
               <Radio className="size-6" />
             </span>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Nexora Pulse</h1>
+              <h1 className="text-2xl font-bold tracking-tight">SensorGrid</h1>
               <p className="text-sm text-text-muted mt-1">Connect. Observe. Automate.</p>
               <p className="text-sm mt-3 max-w-2xl">
                 A production-grade IoT device intelligence & automation platform. Connect physical devices,
@@ -99,7 +99,7 @@ export function AboutView() {
         <CardContent className="p-5">
           <h3 className="text-sm font-semibold mb-2">Architecture note</h3>
           <p className="text-xs text-text-muted leading-relaxed">
-            This sandbox deployment adapts the full Nexora Pulse architecture (which targets NestJS,
+            This sandbox deployment adapts the full SensorGrid architecture (which targets NestJS,
             PostgreSQL+TimescaleDB, Redis+BullMQ, MQTT broker, Docker) into a single Next.js application
             backed by SQLite + Prisma and an in-process socket.io mini-service that simulates the MQTT
             gateway, telemetry ingestion, automation engine, and alert evaluator. The data model, API

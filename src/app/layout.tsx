@@ -17,11 +17,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nexora Pulse — IoT Device Intelligence Platform",
+  title: "SensorGrid — IoT Device Intelligence Platform",
   description:
     "Connect. Observe. Automate. A professional IoT platform for realtime device telemetry, automation, and intelligence.",
   keywords: [
-    "Nexora Pulse",
+    "SensorGrid",
     "IoT",
     "device intelligence",
     "MQTT",
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     "automation",
     "realtime dashboard",
   ],
-  authors: [{ name: "Nexora" }],
+  authors: [{ name: "SensorGrid" }],
   icons: {
     icon: "/logo.svg",
   },

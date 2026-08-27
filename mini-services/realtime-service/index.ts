@@ -1,4 +1,4 @@
-// Nexora Pulse — Realtime Service (socket.io)
+// SensorGrid — Realtime Service (socket.io)
 //
 // This mini-service is the "pulse" of the platform. In the spec's monorepo
 // architecture it would be split into `apps/mqtt-gateway` + `apps/worker`.
@@ -25,8 +25,8 @@ import { PrismaClient } from '@prisma/client'
 
 const db = new PrismaClient({ log: ['error'] })
 const PORT = 3003 // local listen port; Caddy maps ?XTransformPort=3003 -> this port
-const ORG_ID = 'org-nexora-hq'
-const ORG_SLUG = 'nexora-hq'
+const ORG_ID = 'org-sensorgrid-hq'
+const ORG_SLUG = 'sensorgrid-hq'
 
 const io = new Server(
   createServer(),
@@ -314,7 +314,7 @@ async function evaluateAlerts(deviceId: string, sensorKey: string, value: number
     // notification
     const notif = await db.notification.create({
       data: {
-        userId: 'user-pulse',
+        userId: 'user-sensorgrid',
         organizationId: ORG_ID,
         category: 'ALERT',
         title: `Alert: ${rule.name}`,
@@ -410,7 +410,7 @@ async function evaluateAutomations(deviceId: string, sensorKey: string, value: n
             const cfg = node.data.config
             const notif = await db.notification.create({
               data: {
-                userId: 'user-pulse',
+                userId: 'user-sensorgrid',
                 organizationId: ORG_ID,
                 category: String(cfg.category ?? 'AUTOMATION'),
                 title: String(cfg.title ?? 'Notification'),
@@ -479,7 +479,7 @@ async function evaluateOfflineAutomations(deviceId: string, deviceName: string) 
         const cfg = node.data.config
         const notif = await db.notification.create({
           data: {
-            userId: 'user-pulse', organizationId: ORG_ID,
+            userId: 'user-sensorgrid', organizationId: ORG_ID,
             category: String(cfg.category ?? 'DEVICE'),
             title: String(cfg.title ?? 'Device Offline'),
             message: String(cfg.message ?? `${deviceName} is offline.`),
@@ -513,7 +513,7 @@ async function executeCommand(deviceId: string, payload: Record<string, unknown>
       userId: null,
       senderName: sender,
       payload: JSON.stringify(payload),
-      topic: `nexora/${ORG_SLUG}/${deviceId}/command`,
+      topic: `sensorgrid/${ORG_SLUG}/${deviceId}/command`,
       status: 'SENT',
       attempts: 1,
       sentAt: new Date(),
@@ -608,7 +608,7 @@ io.on('connection', (socket) => {
   })
 
   socket.on('command.send', async (data: { deviceId: string; payload: Record<string, unknown> }) => {
-    await executeCommand(data.deviceId, data.payload, 'Pulse Operator')
+    await executeCommand(data.deviceId, data.payload, 'SensorGrid Operator')
   })
 
   socket.on('disconnect', () => {
@@ -627,7 +627,7 @@ async function start() {
   setInterval(tickBatteryAlerts, 60_000)
   // reload device list every 60s (in case devices were added/updated via API)
   setInterval(loadDevices, 60_000)
-  console.log(`[realtime] Nexora Pulse realtime service listening on :${PORT}`)
+  console.log(`[realtime] SensorGrid realtime service listening on :${PORT}`)
 }
 
 io.httpServer.listen(PORT, () => {

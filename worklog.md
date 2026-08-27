@@ -1,14 +1,14 @@
-# Nexora Pulse — Build Worklog
+# SensorGrid — Build Worklog
 
-This is the shared worklog for the Nexora Pulse build. All agents must read this before starting and append their own section when finished.
+This is the shared worklog for the SensorGrid build. All agents must read this before starting and append their own section when finished.
 
 ---
 Task ID: 0
 Agent: orchestrator
-Task: Read Nexora Pulse spec, set up project plan, foundation work.
+Task: Read SensorGrid spec, set up project plan, foundation work.
 
 Work Log:
-- Read the full spec file at `/home/z/my-project/upload/Nexora Pulse Project Spec.md` (2754 lines).
+- Read the full spec file at `/home/z/my-project/upload/SensorGrid Project Spec.md` (2754 lines).
 - Audited existing project: Next.js 16 + React 19 + Tailwind 4 + shadcn/ui (New York style) + Prisma (SQLite) + Recharts + Framer Motion + Zustand + TanStack Query + Zod + next-themes + lucide-react already installed.
 - Sandbox constraints adapted the architecture: single Next.js app (no NestJS monorepo), SQLite via Prisma (no PostgreSQL/TimescaleDB), in-memory cache (no Redis), socket.io mini-service for realtime, single `/` route with internal view switching (user can only see `/`).
 - Created 15-item todo list covering foundation → design system → API → app shell → views → realtime → verification + README.
@@ -47,7 +47,7 @@ Stage Summary:
 ---
 Task ID: 10-11
 Agent: automations-alerts-views
-Task: Build the Automations view (rule canvas with @xyflow/react) and Alerts view (event list + rule grid) for Nexora Pulse.
+Task: Build the Automations view (rule canvas with @xyflow/react) and Alerts view (event list + rule grid) for SensorGrid.
 
 Work Log:
 - Read shared context: types.ts, status.tsx, hooks.ts, store.ts, existing API routes for /api/automations and /api/alerts, shadcn/ui component set, package.json (verified @xyflow/react@12 is installed).
@@ -82,7 +82,7 @@ Stage Summary:
 ---
 Task ID: 9 + 12 + 13
 Agent: telemetry-analytics-console-views
-Task: Build the Telemetry Explorer view (Task 9), Analytics view (Task 12), and Command Console view (Task 13-combined) for Nexora Pulse.
+Task: Build the Telemetry Explorer view (Task 9), Analytics view (Task 12), and Command Console view (Task 13-combined) for SensorGrid.
 
 Work Log:
 - Read shared context first: worklog.md, `lib/types.ts` (TelemetrySeriesDTO, CommandDTO, CommandStatus, etc.), `lib/status.tsx` (COMMAND_STATUS_META, ALERT_SEVERITY_META, formatTime, timeAgo, sensorMeta), `lib/hooks.ts` (useDevices, useDevice, useDeviceTelemetry, useDeviceCommands, useAnalytics, useRealtimeNotifications, qk), `lib/realtime.ts` (useRealtimeSocket), `lib/store.ts`, `lib/api.ts` (toDeviceDTO → confirms twin.reported is a parsed object), and the existing `dashboard-view.tsx` as a stylistic reference. Inspected `app/api/analytics/route.ts`, `app/api/devices/route.ts`, `app/api/devices/[deviceId]/telemetry/route.ts`, and `app/api/devices/[deviceId]/commands/route.ts` to confirm the wire shapes.
@@ -130,7 +130,7 @@ Stage Summary:
 ---
 Task ID: 8
 Agent: devices-views-builder
-Task: Build the Devices list view and Device detail view for Nexora Pulse.
+Task: Build the Devices list view and Device detail view for SensorGrid.
 
 Work Log:
 - Read prior worklog and the shared context: `lib/types.ts` (DeviceDTO, SensorDTO, CommandDTO, AuditLogDTO, TelemetrySeriesDTO), `lib/status.tsx` (DEVICE_STATUS_META, COMMAND_STATUS_META, batteryMeta, signalMeta, timeAgo, formatTime, formatNumber, sensorMeta, deviceTypeIcon), `lib/hooks.ts` (useDevices, useDevice, useDeviceTelemetry, useDeviceHistory, qk), `lib/store.ts` (view / selectedDeviceId / openDevice / setView), and the Aether Grid signature components: `device-orb`, `status-badge`, `telemetry-tile`, `signal-timeline`, plus `charts/telemetry-chart`. Inspected `app/api/devices/route.ts`, `app/api/devices/[deviceId]/route.ts` (PATCH for name/notes/tags), `app/api/devices/[deviceId]/commands/route.ts` (POST body `{ payload }`), `app/api/devices/[deviceId]/twin/route.ts` (PATCH merges desired), and `app/api/devices/[deviceId]/history/route.ts` (returns `{ commands, audits }`).

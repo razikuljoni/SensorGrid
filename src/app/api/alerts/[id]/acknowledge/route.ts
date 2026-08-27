@@ -10,13 +10,13 @@ export async function PATCH(_req: NextRequest, ctx: { params: Promise<{ id: stri
   if (!evt) return error('Alert event not found', 404)
   const updated = await db.alertEvent.update({
     where: { id },
-    data: { status: 'ACKNOWLEDGED', acknowledgedAt: new Date(), acknowledgedBy: 'Pulse Operator' },
+    data: { status: 'ACKNOWLEDGED', acknowledgedAt: new Date(), acknowledgedBy: 'SensorGrid Operator' },
     include: { device: { select: { id: true, name: true } } },
   })
   await db.auditLog.create({
     data: {
       organizationId: DEMO_ORG_ID,
-      actorName: 'Pulse Operator',
+      actorName: 'SensorGrid Operator',
       action: 'alert.acknowledge',
       targetType: 'ALERT',
       targetId: id,

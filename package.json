@@ -1,7 +1,7 @@
 {
   "name": "sensor-grid",
   "version": "1.0.0",
-  "description": "Nexora Pulse - IoT Device Intelligence & Automation Platform",
+  "description": "SensorGrid - IoT Device Intelligence & Automation Platform",
   "license": "MIT",
   "private": true,
   "scripts": {

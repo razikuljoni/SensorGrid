@@ -16,7 +16,7 @@ export async function PATCH(_req: NextRequest, ctx: { params: Promise<{ id: stri
   await db.auditLog.create({
     data: {
       organizationId: DEMO_ORG_ID,
-      actorName: 'Pulse Operator',
+      actorName: 'SensorGrid Operator',
       action: 'alert.resolve',
       targetType: 'ALERT',
       targetId: id,

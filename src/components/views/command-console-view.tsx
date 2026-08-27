@@ -1,7 +1,7 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Nexora Pulse — Command Console View (Task 13-combined)
+// SensorGrid — Command Console View (Task 13-combined)
 // Developer control plane: dispatch raw JSON payloads to a device and watch
 // acknowledgements arrive in real time. Driven by useDevices() +
 // useDeviceCommands() + useRealtimeNotifications() + sonner toasts.
