@@ -403,7 +403,7 @@ async function evaluateAutomations(deviceId: string, sensorKey: string, value: n
           if (node.type === 'action' && node.data.kind === 'send_command') {
             const cfg = node.data.config
             const targetDeviceId = String(cfg.deviceId ?? deviceId)
-            const payload = cfg.payload ?? {}
+            const payload = (cfg.payload ?? {}) as Record<string, unknown>
             await executeCommand(targetDeviceId, payload, `automation:${auto.name}`)
             executionLogs.push({ ts: nowISO(), level: 'info', message: `Action: sent command to ${targetDeviceId}: ${JSON.stringify(payload)}` })
           } else if (node.type === 'notification' && node.data.kind === 'notify') {
@@ -468,7 +468,7 @@ async function evaluateOfflineAutomations(deviceId: string, deviceName: string) 
     const trigger = safeParse<{ deviceId?: string }>(auto.triggerConfig, {})
     if (trigger.deviceId && trigger.deviceId !== deviceId) continue
     const nodes = safeParse<Array<{ id: string; type: string; data: { kind: string; config: Record<string, unknown> } }>>(auto.nodes, [])
-    const edges = safeParse<Array<{ source: string; target: string }>(auto.edges, [])
+    const edges = safeParse<Array<{ source: string; target: string }>>(auto.edges, [])
     const triggerNode = nodes.find((n) => n.type === 'trigger')
     if (!triggerNode) continue
     const logs = [{ ts: nowISO(), level: 'info', message: `Trigger fired: device ${deviceName} went offline` }]

@@ -52,3 +52,17 @@ prompt
 server.log
 # Skills directory
 /skills/
+
+# SQLite & databases
+db/*.db
+db/*.db-journal
+*.db
+*.sqlite
+*.sqlite-journal
+
+# Code graph & tools
+.codegraph/
+tool-results/
+
+# Lockfiles
+pnpm-lock.yaml

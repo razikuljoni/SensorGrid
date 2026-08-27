@@ -1,6 +1,8 @@
 {
-  "name": "nextjs_tailwind_shadcn_ts",
-  "version": "0.2.1",
+  "name": "sensor-grid",
+  "version": "1.0.0",
+  "description": "Nexora Pulse - IoT Device Intelligence & Automation Platform",
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000 2>&1 | tee dev.log",
