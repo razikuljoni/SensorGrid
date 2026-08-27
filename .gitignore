@@ -64,5 +64,19 @@ db/*.db-journal
 .codegraph/
 tool-results/
 
-# Lockfiles
-pnpm-lock.yaml
+# Orchestration / session state
+.omo/
+
+# Lockfiles — pnpm is the preferred package manager (source of truth).
+# Keep pnpm-lock.yaml tracked; ignore alternates (bun/npm/yarn) so multiple
+# package managers never fight over the dependency graph on one machine.
+bun.lock
+bun.lockb
+package-lock.json
+yarn.lock
+
+# Local run artifacts
+dev.log
+dev.out.log
+realtime.log
+*.pid

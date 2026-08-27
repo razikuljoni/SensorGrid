@@ -66,7 +66,7 @@ The product must answer these questions instantly:
 
 ## Screenshots
 
-The following views are available in the running application (use the Preview Panel to view them):
+All screenshot images live in [`public/screenshots/`](public/screenshots/). The following views are available in the running application:
 
 | View | Description |
 |------|-------------|
@@ -288,29 +288,31 @@ Every state has icon + label + color + accessible description. Never relies on c
 
 ### Prerequisites
 
-- [Bun](https://bun.sh) ≥ 1.3
-- Node.js ≥ 20
+- [Node.js](https://nodejs.org) ≥ 20
+- [pnpm](https://pnpm.io) ≥ 9 (preferred) or [npm](https://npmjs.com) ≥ 10
+- [Bun](https://bun.sh) ≥ 1.3 (only for the realtime mini-service dev watcher)
 
 ### Install & Run
 
 ```bash
 # Install dependencies
-bun install
+pnpm install
 
 # Set up the database (SQLite file at db/custom.db)
-bun run db:push
+pnpm run db:push
 
 # Seed demo data (organization, 8 devices, 24h telemetry, automations, alerts)
-bun run scripts/seed.ts
+pnpm run seed
 
 # Start the realtime mini-service (port 3003)
 cd mini-services/realtime-service
-bun run dev
+pnpm install
+pnpm run dev
 # → leave this running in a terminal
 
 # Start the Next.js dev server (port 3000)
 cd ../..
-bun run dev
+pnpm run dev
 ```
 
 Open `http://localhost:3000` (or use the Preview Panel in the sandbox).
@@ -319,11 +321,13 @@ Open `http://localhost:3000` (or use the Preview Panel in the sandbox).
 
 | Script | Description |
 |--------|-------------|
-| `bun run dev` | Start Next.js dev server on port 3000 |
-| `bun run lint` | Run ESLint |
-| `bun run db:push` | Push Prisma schema to SQLite |
-| `bun run db:generate` | Regenerate Prisma Client |
-| `bun run scripts/seed.ts` | Seed demo data |
+| `pnpm run dev` | Start Next.js dev server on port 3000 |
+| `pnpm run lint` | Run ESLint |
+| `pnpm run db:push` | Push Prisma schema to SQLite |
+| `pnpm run db:generate` | Regenerate Prisma Client |
+| `pnpm run seed` | Seed demo data |
+| `pnpm run build` | Production build (standalone output) |
+| `pnpm run start` | Start production server (port 3000) |
 
 ### Quick Restart
 
@@ -341,15 +345,16 @@ A helper script restarts both services cleanly:
 
 ```bash
 # 1. Build the Next.js standalone output
-bun run build
+pnpm run build
 
 # 2. The standalone server is at .next/standalone/server.js
 #    Start it with:
-NODE_ENV=production node .next/standalone/server.js
+pnpm run start
 
 # 3. The realtime mini-service should be run as a separate process:
 cd mini-services/realtime-service
-bun run start
+pnpm install
+pnpm run start
 ```
 
 ### Docker Deployment
@@ -594,10 +599,10 @@ The testing strategy follows the spec:
 
 ```bash
 # Unit + integration (when added)
-bun test
+pnpm test
 
 # E2E with Playwright (when added)
-bunx playwright test
+npx playwright test
 ```
 
 > **Note:** The sandbox deployment focuses on the working application. Test scaffolding is stubbed for the production architecture.
