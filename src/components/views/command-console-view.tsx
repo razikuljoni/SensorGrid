@@ -203,7 +203,7 @@ export default function CommandConsoleView() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col gap-6 p-4 sm:p-6">
+    <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
       {/* ─── Header ─── */}
       <motion.header
         initial={{ opacity: 0, y: -4 }}
@@ -223,7 +223,7 @@ export default function CommandConsoleView() {
         </p>
       </motion.header>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         {/* ─── Left column: composer + presets + templates ─── */}
         <motion.div
           variants={container}

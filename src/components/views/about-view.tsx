@@ -25,7 +25,7 @@ const FEATURES = [
 
 export function AboutView() {
   return (
-    <div className="min-h-screen flex flex-col gap-6 p-4 sm:p-6 max-w-5xl">
+    <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6 max-w-5xl">
       {/* Hero */}
       <Card className="relative overflow-hidden">
         <div className="aether-glow absolute inset-0 opacity-60" style={{ ['--glow-x' as string]: '20%', ['--glow-y' as string]: '0%' }} />

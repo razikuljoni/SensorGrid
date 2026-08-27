@@ -1,24 +1,22 @@
 'use client'
 
 import * as React from 'react'
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
-import { useTheme } from 'next-themes'
 import {
   Activity,
   AlertTriangle,
   Bell,
+  ChevronDown,
   ChevronRight,
-  Command,
   Cpu,
   Gauge,
   LayoutDashboard,
   type LucideIcon,
-  Moon,
+  LogOut,
   Radio,
   Settings,
-  Sun,
   Terminal,
+  User,
   Zap,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -31,9 +29,13 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from '@/components/ui/sheet'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { toast } from 'sonner'
 import { useUnreadNotifications } from '@/lib/hooks'
 
 // ─── Nexora logo mark ────────────────────────────────────────────────────────
@@ -74,6 +76,100 @@ const NAV_GROUPS: { id: NavItem['group']; label: string }[] = [
   { id: 'system', label: 'System' },
 ]
 
+// ─── User card dropdown (bottom of sidebar) ──────────────────────────────────
+function UserCardDropdown({ onNavigate }: { onNavigate?: () => void }) {
+  const setView = useAppStore((s) => s.setView)
+  const [open, setOpen] = React.useState(false)
+
+  const handleLogout = async () => {
+    setOpen(false)
+    onNavigate?.()
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {}
+    toast.success('Signed out', {
+      description: 'You have been logged out of Nexora Pulse.',
+    })
+    setView('dashboard')
+  }
+
+  const handleNavigate = (view: ViewKey) => {
+    setOpen(false)
+    onNavigate?.()
+    setView(view)
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2 bg-sidebar-accent/40 transition-colors hover:bg-sidebar-accent/70 text-left"
+          aria-label="User menu"
+        >
+          <Avatar className="size-7 shrink-0">
+            <AvatarFallback className="bg-primary text-primary-foreground text-[10px] font-medium">PO</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <div className="text-xs font-medium truncate">Pulse Operator</div>
+            <div className="text-[10px] text-sidebar-foreground/50 truncate">OWNER · Nexora HQ</div>
+          </div>
+          <ChevronDown className="size-3 text-sidebar-foreground/40 shrink-0" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent side="top" align="start" className="w-56 p-2 mb-1">
+        {/* User identity */}
+        <div className="flex items-center gap-3 px-1 py-2">
+          <Avatar className="size-9">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-medium">PO</AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium truncate">Pulse Operator</p>
+            <p className="text-xs text-text-muted truncate">pulse@nexora.dev</p>
+          </div>
+        </div>
+
+        <Separator className="my-1" />
+
+        {/* Organization */}
+        <div className="flex items-center gap-2 rounded-md px-2 py-1.5 cursor-default">
+          <div className="flex size-6 items-center justify-center rounded-md bg-sidebar-primary text-[10px] font-bold text-sidebar-primary-foreground">NH</div>
+          <span className="text-sm flex-1 truncate">Nexora HQ</span>
+          <Badge variant="outline" className="text-[9px]">PRO</Badge>
+        </div>
+
+        <Separator className="my-1" />
+
+        {/* Menu items */}
+        <button
+          className="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-muted transition-colors"
+          onClick={() => handleNavigate('settings')}
+        >
+          <User className="size-3.5 text-text-muted" />
+          Profile & Settings
+        </button>
+        <button
+          className="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm hover:bg-muted transition-colors"
+          onClick={() => handleNavigate('about')}
+        >
+          <Settings className="size-3.5 text-text-muted" />
+          About Nexora Pulse
+        </button>
+
+        <Separator className="my-1" />
+
+        {/* Logout */}
+        <button
+          className="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-sm text-danger hover:bg-danger/10 transition-colors"
+          onClick={handleLogout}
+        >
+          <LogOut className="size-3.5" />
+          Log out
+        </button>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 // ─── Sidebar ─────────────────────────────────────────────────────────────────
 export function Sidebar() {
   const view = useAppStore((s) => s.view)
@@ -84,18 +180,18 @@ export function Sidebar() {
   const content = (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       {/* Brand */}
-      <div className="flex h-16 items-center gap-2 px-4 border-b border-sidebar-border">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+      <div className="flex h-14 sm:h-16 items-center gap-2 px-3 sm:px-4 border-b border-sidebar-border shrink-0">
+        <span className="flex size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shrink-0">
           <NexoraMark className="size-5" />
         </span>
-        <div className="leading-tight">
-          <div className="text-sm font-semibold tracking-tight">Nexora Pulse</div>
-          <div className="text-[10px] text-sidebar-foreground/60">IoT Intelligence</div>
+        <div className="leading-tight min-w-0">
+          <div className="text-sm font-semibold tracking-tight truncate">Nexora Pulse</div>
+          <div className="text-[10px] text-sidebar-foreground/60 truncate">IoT Intelligence</div>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-5">
+      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4 sm:space-y-5">
         {NAV_GROUPS.map((group) => (
           <div key={group.id}>
             <p className="px-2 mb-1 text-[10px] font-semibold uppercase tracking-wider text-sidebar-foreground/40">{group.label}</p>
@@ -106,7 +202,7 @@ export function Sidebar() {
                   <li key={item.key}>
                     <button
                       type="button"
-                      onClick={() => setView(item.key)}
+                      onClick={() => { setView(item.key); setSidebarOpen(false) }}
                       className={cn(
                         'group flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
                         active ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium' : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
@@ -126,15 +222,9 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer: org + theme */}
-      <div className="border-t border-sidebar-border p-3 space-y-2">
-        <div className="flex items-center gap-2 rounded-lg px-2 py-1.5 bg-sidebar-accent/40">
-          <div className="flex size-7 items-center justify-center rounded-md bg-sidebar-primary text-[10px] font-bold text-sidebar-primary-foreground">NH</div>
-          <div className="min-w-0 flex-1">
-            <div className="text-xs font-medium truncate">Nexora HQ</div>
-            <div className="text-[10px] text-sidebar-foreground/50 truncate">PRO plan</div>
-          </div>
-        </div>
+      {/* Footer: user card dropdown */}
+      <div className="border-t border-sidebar-border p-2 sm:p-3 shrink-0">
+        <UserCardDropdown onNavigate={() => setSidebarOpen(false)} />
       </div>
     </div>
   )
@@ -142,13 +232,13 @@ export function Sidebar() {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="hidden lg:block w-60 shrink-0 border-r border-border h-screen sticky top-0">
+      <aside className="hidden lg:block w-56 xl:w-60 shrink-0 border-r border-border h-screen sticky top-0">
         {content}
       </aside>
 
       {/* Mobile sidebar */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-64 p-0">
+        <SheetContent side="left" className="w-72 sm:w-64 p-0">
           <SheetHeader className="sr-only">
             <SheetTitle>Navigation</SheetTitle>
           </SheetHeader>
@@ -160,7 +250,6 @@ export function Sidebar() {
 }
 
 function SidebarAlertBadge() {
-  // Hook must be called unconditionally; this component is rendered only inside the alerts nav row.
   const { activeCount } = useAlertCount()
   if (activeCount === 0) return null
   return (

@@ -30,8 +30,8 @@ export function NotificationsView() {
   const categories: Array<'all' | NotificationCategory> = ['all', 'DEVICE', 'ALERT', 'AUTOMATION', 'SYSTEM', 'SECURITY']
 
   return (
-    <div className="min-h-screen flex flex-col gap-4 p-4 sm:p-6">
-      <Card className="flex-1 flex flex-col min-h-0">
+    <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
+      <Card className="flex-1 flex flex-col min-h-0 mx-auto w-full max-w-4xl">
         <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-border">
           <div className="flex items-center gap-3">
             <CardTitle className="text-base flex items-center gap-2">

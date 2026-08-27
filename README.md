@@ -14,22 +14,25 @@ It combines the feel of Home Assistant, ThingsBoard, Grafana dashboards, and Ver
 
 1. [Vision](#vision)
 2. [Screenshots](#screenshots)
-3. [Architecture](#architecture)
-4. [Aether Grid Design System](#aether-grid-design-system)
-5. [Technology Stack](#technology-stack)
-6. [Local Development](#local-development)
-7. [Realtime & MQTT Setup](#realtime--mqtt-setup)
-8. [Device Simulator](#device-simulator)
-9. [Environment Variables](#environment-variables)
-10. [Testing](#testing)
-11. [CI/CD](#cicd)
-12. [Observability](#observability)
-13. [Security](#security)
-14. [Project Structure](#project-structure)
-15. [API Reference](#api-reference)
-16. [WebSocket Events](#websocket-events)
-17. [Roadmap](#roadmap)
-18. [Limitations](#limitations)
+3. [Responsive Design](#responsive-design)
+4. [Architecture](#architecture)
+5. [Aether Grid Design System](#aether-grid-design-system)
+6. [Technology Stack](#technology-stack)
+7. [Local Development](#local-development)
+8. [Deployment](#deployment)
+9. [Realtime & MQTT Setup](#realtime--mqtt-setup)
+10. [Device Simulator](#device-simulator)
+11. [Environment Variables](#environment-variables)
+12. [Authentication & Logout](#authentication--logout)
+13. [Testing](#testing)
+14. [CI/CD](#cicd)
+15. [Observability](#observability)
+16. [Security](#security)
+17. [Project Structure](#project-structure)
+18. [API Reference](#api-reference)
+19. [WebSocket Events](#websocket-events)
+20. [Roadmap](#roadmap)
+21. [Limitations](#limitations)
 
 ---
 
@@ -79,6 +82,43 @@ The following views are available in the running application (use the Preview Pa
 | **Activity Log** | Unified audit trail with filters by action type and free-text search |
 | **Settings** | Organization info, members with RBAC roles, integrations status |
 | **About** | Product overview, feature list, technology stack |
+
+---
+
+## Responsive Design
+
+Nexora Pulse is built **mobile-first** and is fully fluid responsive across all breakpoints.
+
+### Breakpoints
+
+| Breakpoint | Width | Layout Behavior |
+|------------|-------|-----------------|
+| Mobile | 320–639px | Single column, sidebar hidden (hamburger menu), KPI cards 2/row, device cards 1/col |
+| Tablet (sm) | 640–1023px | 2-column grids, sidebar still hamburger, KPI cards 2–3/row |
+| Desktop (lg) | 1024–1279px | Sidebar visible (fixed), 3-column device grid, KPI cards 3–5/row |
+| Wide (xl) | 1280px+ | Full 4-column device grid, 5-column KPI row |
+
+### Responsive Features
+
+- **Sidebar**: Fixed on `lg+`, slide-out Sheet on mobile/tablet (hamburger trigger)
+- **Header**: Compact height (56px) on mobile, full height (64px) on `sm+`; search bar hidden on mobile, appears on `lg+`
+- **KPI Cards**: 2 per row on mobile, 3 on `lg`, 5 on `xl` — cards scale internal padding and font sizes
+- **Device Cards**: 1 per row on mobile, 2 on `sm`, 3 on `lg`, 4 on `xl`
+- **Device Detail**: Tabs scroll horizontally on narrow screens; content stacks vertically
+- **Telemetry Tiles**: 2 per row on narrow cards, 3 on wider cards
+- **Environment Panel**: 2-column grid on mobile, 3 on `md`, 5 on `lg`
+- **Charts**: All charts use `ResponsiveContainer` with `width="100%"` — no horizontal overflow
+- **Command Console**: Stacks vertically on mobile, side-by-side on `lg+`
+- **Automations**: List stacks above canvas on mobile, side-by-side on `lg+`
+
+### Logout
+
+Logout is available from two locations:
+
+1. **Header profile dropdown** (top-right) — click your avatar → "Log out" at the bottom of the menu
+2. **Sidebar user card** (bottom-left) — click the user info card → "Log out" at the bottom of the popover
+
+Both call `POST /api/auth/logout`, show a toast confirmation, and reset to the dashboard view. An audit log entry is recorded.
 
 ---
 
@@ -295,6 +335,114 @@ A helper script restarts both services cleanly:
 
 ---
 
+## Deployment
+
+### Production Build
+
+```bash
+# 1. Build the Next.js standalone output
+bun run build
+
+# 2. The standalone server is at .next/standalone/server.js
+#    Start it with:
+NODE_ENV=production node .next/standalone/server.js
+
+# 3. The realtime mini-service should be run as a separate process:
+cd mini-services/realtime-service
+bun run start
+```
+
+### Docker Deployment
+
+For production, use Docker Compose. Create a `docker-compose.yml`:
+
+```yaml
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=file:/data/db/custom.db
+      - NODE_ENV=production
+    volumes:
+      - db-data:/data/db
+    depends_on:
+      - realtime
+
+  realtime:
+    build: ./mini-services/realtime-service
+    environment:
+      - DATABASE_URL=file:/data/db/custom.db
+    volumes:
+      - db-data:/data/db
+
+volumes:
+  db-data:
+```
+
+Create a `Dockerfile`:
+
+```dockerfile
+# Multi-stage build
+FROM node:20-slim AS deps
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN npm install --legacy-peer-deps
+
+FROM node:20-slim AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN npx prisma generate
+RUN npm run build
+
+FROM node:20-slim AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/db ./db
+EXPOSE 3000
+CMD ["node", "server.js"]
+```
+
+### Environment Checklist for Production
+
+Before deploying, ensure:
+
+- [ ] `DATABASE_URL` points to a persistent volume (SQLite) or PostgreSQL connection string
+- [ ] The realtime mini-service is running on port 3003 and accessible from the web app
+- [ ] The Caddy/Nginx gateway is configured to route `?XTransformPort=3003` to the realtime service
+- [ ] All environment variables in `.env.example` are set
+- [ ] `bun run lint` passes with 0 errors
+- [ ] `bun run build` succeeds without errors
+- [ ] The database is seeded (`bun run scripts/seed.ts`) for initial demo data
+- [ ] HTTPS/TLS is configured for production
+- [ ] CORS headers are restricted to your domain
+- [ ] Rate limiting is enabled on auth + command endpoints
+
+### Vercel / Netlify Deployment Notes
+
+This app uses a **socket.io mini-service** for realtime, which requires a persistent process. Serverless platforms (Vercel, Netlify) don't support long-running socket connections natively. For serverless deployment:
+
+1. Deploy the Next.js app to Vercel
+2. Deploy the realtime mini-service to a container platform (Railway, Render, Fly.io)
+3. Update `REALTIME_PORT` and the socket.io connection URL in `src/lib/realtime.ts`
+4. Use a managed PostgreSQL (Supabase, Neon) instead of SQLite
+
+### Health Check
+
+Both services expose health endpoints:
+
+- **Web**: `GET /api` — returns API metadata
+- **Realtime**: socket.io connection on port 3003 — check `connected` event
+
+---
+
 ## Realtime & MQTT Setup
 
 ### How Realtime Works in This Deployment
@@ -390,6 +538,45 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 All environment variables are validated at startup. Never commit `.env`.
+
+---
+
+## Authentication & Logout
+
+### Current State (Demo)
+
+This sandbox deployment uses a **demo authentication model** — there is a single seeded user (`Pulse Operator` / `pulse@nexora.dev`) who is always "logged in". There is no login screen; the app loads directly into the dashboard.
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/auth` | Get current user + organization context |
+| POST | `/api/auth` | Demo login (always returns the demo user) |
+| POST | `/api/auth/logout` | Logout — records audit entry, clears session cookie |
+
+### Logout Flow
+
+1. User clicks **"Log out"** in either:
+   - The header profile dropdown (top-right avatar → bottom of menu)
+   - The sidebar user card dropdown (bottom-left user info → bottom of popover)
+2. The app calls `POST /api/auth/logout`
+3. An `auth.logout` audit log entry is recorded
+4. The session cookie is cleared
+5. A success toast appears: "Signed out — You have been logged out of Nexora Pulse."
+6. The view resets to the Dashboard
+
+### Production Authentication
+
+For production, integrate **NextAuth.js v4** (already installed):
+
+```bash
+# .env
+NEXTAUTH_URL=https://your-domain.com
+NEXTAUTH_SECRET=your-secret-key
+```
+
+Configure providers (email/password, GitHub, Google) in `src/lib/auth.ts` and protect API routes with session checks. The current `DEMO_ORG_ID` and `DEMO_USER_ID` constants in `src/lib/api.ts` should be replaced with session-derived values.
 
 ---
 

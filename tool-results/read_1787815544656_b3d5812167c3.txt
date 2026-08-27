@@ -1,0 +1,786 @@
+     1→'use client'
+     2→
+     3→import * as React from 'react'
+     4→import { useQueryClient } from '@tanstack/react-query'
+     5→import { toast } from 'sonner'
+     6→import {
+     7→  Activity,
+     8→  AlertTriangle,
+     9→  Bell,
+    10→  CheckCircle2,
+    11→  Clock,
+    12→  Cpu,
+    13→  Filter,
+    14→  Plus,
+    15→  RefreshCw,
+    16→  ShieldAlert,
+    17→  ShieldCheck,
+    18→  Sliders,
+    19→  Thermometer,
+    20→} from 'lucide-react'
+    21→
+    22→import { cn } from '@/lib/utils'
+    23→import { useAlerts, useDevices, qk } from '@/lib/hooks'
+    24→import {
+    25→  ALERT_SEVERITY_META,
+    26→  ALERT_STATUS_META,
+    27→  timeAgo,
+    28→  formatTime,
+    29→} from '@/lib/status'
+    30→import type {
+    31→  AlertCondition,
+    32→  AlertEventDTO,
+    33→  AlertRuleDTO,
+    34→  AlertSeverity,
+    35→  AlertStatus,
+    36→  DeviceDTO,
+    37→} from '@/lib/types'
+    38→
+    39→import { Button } from '@/components/ui/button'
+    40→import { Card } from '@/components/ui/card'
+    41→import { Input } from '@/components/ui/input'
+    42→import { Label } from '@/components/ui/label'
+    43→import { Switch } from '@/components/ui/switch'
+    44→import { Skeleton } from '@/components/ui/skeleton'
+    45→import { Badge } from '@/components/ui/badge'
+    46→import { ScrollArea } from '@/components/ui/scroll-area'
+    47→import {
+    48→  Dialog,
+    49→  DialogContent,
+    50→  DialogDescription,
+    51→  DialogFooter,
+    52→  DialogHeader,
+    53→  DialogTitle,
+    54→} from '@/components/ui/dialog'
+    55→import {
+    56→  Select,
+    57→  SelectContent,
+    58→  SelectItem,
+    59→  SelectTrigger,
+    60→  SelectValue,
+    61→} from '@/components/ui/select'
+    62→import {
+    63→  Tabs,
+    64→  TabsList,
+    65→  TabsTrigger,
+    66→  TabsContent,
+    67→} from '@/components/ui/tabs'
+    68→
+    69→// The /api/alerts endpoint extends each rule with a `device` reference (for display).
+    70→// The base AlertRuleDTO doesn't include it, so we extend locally.
+    71→type AlertRuleWithDevice = AlertRuleDTO & {
+    72→  device?: { id: string; name: string } | null
+    73→}
+    74→
+    75→// ─────────────────────────────────────────────────────────────────────────────
+    76→// Local AlertSeverityBadge / AlertStatusBadge
+    77→// (Built on top of ALERT_SEVERITY_META / ALERT_STATUS_META from status.tsx)
+    78→// ─────────────────────────────────────────────────────────────────────────────
+    79→
+    80→export function AlertSeverityBadge({
+    81→  severity,
+    82→  size = 'md',
+    83→  className,
+    84→}: {
+    85→  severity: AlertSeverity
+    86→  size?: 'sm' | 'md'
+    87→  className?: string
+    88→}) {
+    89→  const meta = ALERT_SEVERITY_META[severity]
+    90→  const Icon = meta.icon
+    91→  return (
+    92→    <span
+    93→      className={cn(
+    94→        'inline-flex items-center gap-1.5 rounded-full border font-medium whitespace-nowrap',
+    95→        meta.color,
+    96→        meta.bg,
+    97→        meta.border,
+    98→        size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs',
+    99→        className
+   100→      )}
+   101→    >
+   102→      <span className="aether-status-dot" style={{ color: meta.dot }} />
+   103→      <Icon className={cn(size === 'sm' ? 'size-2.5' : 'size-3')} />
+   104→      <span>{meta.label}</span>
+   105→    </span>
+   106→  )
+   107→}
+   108→
+   109→export function AlertStatusBadge({
+   110→  status,
+   111→  size = 'md',
+   112→  className,
+   113→}: {
+   114→  status: AlertStatus
+   115→  size?: 'sm' | 'md'
+   116→  className?: string
+   117→}) {
+   118→  const meta = ALERT_STATUS_META[status]
+   119→  const Icon = meta.icon
+   120→  return (
+   121→    <span
+   122→      className={cn(
+   123→        'inline-flex items-center gap-1.5 rounded-full border font-medium whitespace-nowrap',
+   124→        meta.color,
+   125→        meta.bg,
+   126→        meta.border,
+   127→        size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs',
+   128→        className
+   129→      )}
+   130→    >
+   131→      <span className="aether-status-dot" style={{ color: meta.dot }} />
+   132→      <Icon className={cn(size === 'sm' ? 'size-2.5' : 'size-3')} />
+   133→      <span>{meta.label}</span>
+   134→    </span>
+   135→  )
+   136→}
+   137→
+   138→// ─────────────────────────────────────────────────────────────────────────────
+   139→// Condition helpers
+   140→// ─────────────────────────────────────────────────────────────────────────────
+   141→
+   142→const CONDITION_SYMBOL: Record<AlertCondition, string> = {
+   143→  GT: '>',
+   144→  LT: '<',
+   145→  GTE: '≥',
+   146→  LTE: '≤',
+   147→  EQ: '=',
+   148→  NEQ: '≠',
+   149→  OFFLINE_FOR: 'offline for',
+   150→  BATTERY_BELOW: 'battery <',
+   151→}
+   152→
+   153→const CONDITION_LABEL: Record<AlertCondition, string> = {
+   154→  GT: 'Greater Than',
+   155→  LT: 'Less Than',
+   156→  GTE: 'Greater or Equal',
+   157→  LTE: 'Less or Equal',
+   158→  EQ: 'Equal',
+   159→  NEQ: 'Not Equal',
+   160→  OFFLINE_FOR: 'Offline For (s)',
+   161→  BATTERY_BELOW: 'Battery Below',
+   162→}
+   163→
+   164→function formatCondition(rule: { condition: AlertCondition; sensorKey: string | null; threshold: number | null }): string {
+   165→  const sym = CONDITION_SYMBOL[rule.condition] ?? '?'
+   166→  if (rule.condition === 'OFFLINE_FOR') {
+   167→    return `offline_for ${rule.threshold ?? 0}s`
+   168→  }
+   169→  if (rule.condition === 'BATTERY_BELOW') {
+   170→    return `battery < ${rule.threshold ?? 0}`
+   171→  }
+   172→  const key = rule.sensorKey ?? 'value'
+   173→  const t = rule.threshold ?? 0
+   174→  return `${key} ${sym} ${t}`
+   175→}
+   176→
+   177→function formatCooldown(seconds: number): string {
+   178→  if (!seconds || seconds <= 0) return 'No cooldown'
+   179→  if (seconds < 60) return `${seconds}s cooldown`
+   180→  if (seconds < 3600) return `${Math.floor(seconds / 60)}m cooldown`
+   181→  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h cooldown`
+   182→  return `${Math.floor(seconds / 86400)}d cooldown`
+   183→}
+   184→
+   185→// ─────────────────────────────────────────────────────────────────────────────
+   186→// Alert Event Row
+   187→// ─────────────────────────────────────────────────────────────────────────────
+   188→
+   189→interface AlertEventRowProps {
+   190→  event: AlertEventDTO
+   191→  onAcknowledge: (id: string) => void
+   192→  onResolve: (id: string) => void
+   193→  busy: boolean
+   194→}
+   195→
+   196→function AlertEventRow({ event, onAcknowledge, onResolve, busy }: AlertEventRowProps) {
+   197→  const canAck = event.status === 'TRIGGERED'
+   198→  const canResolve = event.status === 'TRIGGERED' || event.status === 'ACKNOWLEDGED'
+   199→
+   200→  return (
+   201→    <Card className="p-4 gap-3">
+   202→      <div className="flex flex-wrap items-start justify-between gap-3">
+   203→        <div className="flex items-start gap-3 min-w-0 flex-1">
+   204→          <span
+   205→            className={cn(
+   206→              'mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl',
+   207→              ALERT_SEVERITY_META[event.severity].bg,
+   208→              ALERT_SEVERITY_META[event.severity].color
+   209→            )}
+   210→          >
+   211→            {event.severity === 'CRITICAL' ? <ShieldAlert className="size-4" /> : event.severity === 'WARNING' ? <AlertTriangle className="size-4" /> : <Activity className="size-4" />}
+   212→          </span>
+   213→          <div className="min-w-0 flex-1">
+   214→            <div className="flex flex-wrap items-center gap-2">
+   215→              <h3 className="text-sm font-semibold truncate">{event.ruleName}</h3>
+   216→              <AlertSeverityBadge severity={event.severity} size="sm" />
+   217→              <AlertStatusBadge status={event.status} size="sm" />
+   218→            </div>
+   219→            <p className="mt-1 text-xs text-text-secondary">{event.message}</p>
+   220→            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-text-muted">
+   221→              <span className="inline-flex items-center gap-1">
+   222→                <Cpu className="size-3" />
+   223→                {event.device?.name ?? 'No device'}
+   224→              </span>
+   225→              <span className="inline-flex items-center gap-1">
+   226→                <Clock className="size-3" />
+   227→                {timeAgo(event.triggeredAt)}
+   228→              </span>
+   229→              {event.acknowledgedBy && (
+   230→                <span className="inline-flex items-center gap-1">
+   231→                  <CheckCircle2 className="size-3" />
+   232→                  ack by {event.acknowledgedBy}
+   233→                </span>
+   234→              )}
+   235→              <span title={formatTime(event.triggeredAt)} className="text-text-muted/70">
+   236→                {formatTime(event.triggeredAt, false)}
+   237→              </span>
+   238→            </div>
+   239→          </div>
+   240→        </div>
+   241→        <div className="flex items-center gap-1.5">
+   242→          {canAck && (
+   243→            <Button
+   244→              size="sm"
+   245→              variant="outline"
+   246→              disabled={busy}
+   247→              onClick={() => onAcknowledge(event.id)}
+   248→            >
+   249→              <CheckCircle2 className="size-3.5" /> Acknowledge
+   250→            </Button>
+   251→          )}
+   252→          {canResolve && (
+   253→            <Button
+   254→              size="sm"
+   255→              disabled={busy}
+   256→              onClick={() => onResolve(event.id)}
+   257→            >
+   258→              <ShieldCheck className="size-3.5" /> Resolve
+   259→            </Button>
+   260→          )}
+   261→          {event.status === 'RESOLVED' && (
+   262→            <Badge variant="outline" className="text-success border-success/30 bg-success/10">
+   263→              <CheckCircle2 className="size-3" /> Resolved
+   264→            </Badge>
+   265→          )}
+   266→        </div>
+   267→      </div>
+   268→    </Card>
+   269→  )
+   270→}
+   271→
+   272→function AlertEventSkeleton() {
+   273→  return (
+   274→    <Card className="p-4 gap-3">
+   275→      <div className="flex items-start gap-3">
+   276→        <Skeleton className="size-9 rounded-xl" />
+   277→        <div className="flex-1 space-y-2">
+   278→          <div className="flex gap-2">
+   279→            <Skeleton className="h-4 w-40" />
+   280→            <Skeleton className="h-4 w-16 rounded-full" />
+   281→            <Skeleton className="h-4 w-16 rounded-full" />
+   282→          </div>
+   283→          <Skeleton className="h-3 w-full" />
+   284→          <Skeleton className="h-3 w-2/3" />
+   285→        </div>
+   286→      </div>
+   287→    </Card>
+   288→  )
+   289→}
+   290→
+   291→// ─────────────────────────────────────────────────────────────────────────────
+   292→// Alert Rule Card
+   293→// ─────────────────────────────────────────────────────────────────────────────
+   294→
+   295→interface AlertRuleCardProps {
+   296→  rule: AlertRuleWithDevice
+   297→}
+   298→
+   299→function AlertRuleCard({ rule }: AlertRuleCardProps) {
+   300→  const condition = formatCondition(rule)
+   301→  return (
+   302→    <Card className="p-4 gap-3">
+   303→      <div className="flex items-start justify-between gap-2">
+   304→        <div className="flex items-start gap-2 min-w-0 flex-1">
+   305→          <span
+   306→            className={cn(
+   307→              'mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg',
+   308→              ALERT_SEVERITY_META[rule.severity].bg,
+   309→              ALERT_SEVERITY_META[rule.severity].color
+   310→            )}
+   311→          >
+   312→            <Bell className="size-3.5" />
+   313→          </span>
+   314→          <div className="min-w-0 flex-1">
+   315→            <h3 className="text-sm font-semibold truncate">{rule.name}</h3>
+   316→            <p className="text-[11px] text-text-muted truncate">
+   317→              {rule.description ?? 'No description provided.'}
+   318→            </p>
+   319→          </div>
+   320→        </div>
+   321→        <Switch checked={rule.enabled} disabled aria-label={`Rule ${rule.name} enabled`} />
+   322→      </div>
+   323→
+   324→      <div className="flex flex-wrap items-center gap-2">
+   325→        <AlertSeverityBadge severity={rule.severity} size="sm" />
+   326→        <Badge variant="outline" className="text-[10px]">
+   327→          {rule.enabled ? 'Active' : 'Disabled'}
+   328→        </Badge>
+   329→        <span className="inline-flex items-center gap-1 text-[11px] text-text-muted">
+   330→          <Clock className="size-3" /> {formatCooldown(rule.cooldownSeconds)}
+   331→        </span>
+   332→      </div>
+   333→
+   334→      <div className="rounded-md border border-border bg-muted/40 p-3">
+   335→        <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">Condition</p>
+   336→        <div className="flex items-center gap-2">
+   337→          <Filter className="size-3.5 text-text-muted" />
+   338→          <code className="font-mono text-xs break-all">{condition}</code>
+   339→        </div>
+   340→      </div>
+   341→
+   342→      <div className="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-border/60 -mx-4 px-4">
+   343→        <div>
+   344→          <p className="text-text-muted uppercase tracking-wide text-[10px]">Device</p>
+   345→          <p className="font-medium truncate flex items-center gap-1">
+   346→            <Cpu className="size-3 text-text-muted" />
+   347→            {rule.device?.name ?? 'Any'}
+   348→          </p>
+   349→        </div>
+   350→        <div>
+   351→          <p className="text-text-muted uppercase tracking-wide text-[10px]">Sensor</p>
+   352→          <p className="font-mono truncate flex items-center gap-1">
+   353→            <Thermometer className="size-3 text-text-muted" />
+   354→            {rule.sensorKey ?? 'any'}
+   355→          </p>
+   356→        </div>
+   357→      </div>
+   358→    </Card>
+   359→  )
+   360→}
+   361→
+   362→function AlertRuleSkeleton() {
+   363→  return (
+   364→    <Card className="p-4 gap-3">
+   365→      <div className="flex items-start justify-between gap-2">
+   366→        <div className="flex items-start gap-2 flex-1">
+   367→          <Skeleton className="size-8 rounded-lg" />
+   368→          <div className="flex-1 space-y-2">
+   369→            <Skeleton className="h-4 w-3/4" />
+   370→            <Skeleton className="h-3 w-full" />
+   371→          </div>
+   372→        </div>
+   373→        <Skeleton className="h-5 w-9 rounded-full" />
+   374→      </div>
+   375→      <div className="flex gap-2">
+   376→        <Skeleton className="h-5 w-20 rounded-full" />
+   377→        <Skeleton className="h-5 w-16 rounded-full" />
+   378→      </div>
+   379→      <Skeleton className="h-12 w-full" />
+   380→    </Card>
+   381→  )
+   382→}
+   383→
+   384→// ─────────────────────────────────────────────────────────────────────────────
+   385→// New Alert Rule Dialog
+   386→// ─────────────────────────────────────────────────────────────────────────────
+   387→
+   388→interface NewAlertRuleDialogProps {
+   389→  open: boolean
+   390→  onOpenChange: (open: boolean) => void
+   391→}
+   392→
+   393→function NewAlertRuleDialog({ open, onOpenChange }: NewAlertRuleDialogProps) {
+   394→  const qc = useQueryClient()
+   395→  const { data: devices } = useDevices()
+   396→
+   397→  const [name, setName] = React.useState('')
+   398→  const [description, setDescription] = React.useState('')
+   399→  const [deviceId, setDeviceId] = React.useState<string>('')
+   400→  const [selectedDevice, setSelectedDevice] = React.useState<DeviceDTO | null>(null)
+   401→  const [sensorKey, setSensorKey] = React.useState<string>('')
+   402→  const [condition, setCondition] = React.useState<AlertCondition>('GT')
+   403→  const [threshold, setThreshold] = React.useState<string>('30')
+   404→  const [severity, setSeverity] = React.useState<AlertSeverity>('WARNING')
+   405→  const [saving, setSaving] = React.useState(false)
+   406→
+   407→  // Reset sensor when device changes
+   408→  React.useEffect(() => {
+   409→    setSensorKey('')
+   410→  }, [deviceId])
+   411→
+   412→  const devicesList = devices ?? []
+   413→  const currentDevice = devicesList.find((d) => d.id === deviceId) ?? null
+   414→  React.useEffect(() => {
+   415→    setSelectedDevice(currentDevice ?? null)
+   416→  }, [currentDevice])
+   417→
+   418→  const reset = () => {
+   419→    setName('')
+   420→    setDescription('')
+   421→    setDeviceId('')
+   422→    setSensorKey('')
+   423→    setCondition('GT')
+   424→    setThreshold('30')
+   425→    setSeverity('WARNING')
+   426→  }
+   427→
+   428→  const submit = async () => {
+   429→    if (!name.trim()) {
+   430→      toast.error('Name is required')
+   431→      return
+   432→    }
+   433→    setSaving(true)
+   434→    try {
+   435→      const body = {
+   436→        name: name.trim(),
+   437→        description: description.trim() || null,
+   438→        deviceId: deviceId || null,
+   439→        sensorKey: sensorKey || null,
+   440→        condition,
+   441→        threshold: threshold === '' ? null : Number(threshold),
+   442→        severity,
+   443→        enabled: true,
+   444→        cooldownSeconds: 300,
+   445→      }
+   446→      const r = await fetch('/api/alerts', {
+   447→        method: 'POST',
+   448→        headers: { 'Content-Type': 'application/json' },
+   449→        body: JSON.stringify(body),
+   450→      })
+   451→      if (!r.ok) throw new Error('Failed to create alert rule')
+   452→      toast.success('Alert rule created', { description: name.trim() })
+   453→      qc.invalidateQueries({ queryKey: ['alerts'] })
+   454→      onOpenChange(false)
+   455→      reset()
+   456→    } catch (err) {
+   457→      toast.error('Could not create alert rule', { description: err instanceof Error ? err.message : 'Unknown error' })
+   458→    } finally {
+   459→      setSaving(false)
+   460→    }
+   461→  }
+   462→
+   463→  const sensorOptions = selectedDevice?.sensors ?? []
+   464→
+   465→  return (
+   466→    <Dialog open={open} onOpenChange={(o) => { if (!saving) { onOpenChange(o); if (!o) reset() } }}>
+   467→      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
+   468→        <DialogHeader>
+   469→          <DialogTitle>New Alert Rule</DialogTitle>
+   470→          <DialogDescription>Define a condition that triggers an alert event when breached.</DialogDescription>
+   471→        </DialogHeader>
+   472→        <div className="flex flex-col gap-4">
+   473→          <div className="flex flex-col gap-1.5">
+   474→            <Label htmlFor="rule-name">Name</Label>
+   475→            <Input id="rule-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Server room overheat" />
+   476→          </div>
+   477→          <div className="flex flex-col gap-1.5">
+   478→            <Label htmlFor="rule-desc">Description</Label>
+   479→            <Input id="rule-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What this rule watches for" />
+   480→          </div>
+   481→          <div className="grid grid-cols-2 gap-3">
+   482→            <div className="flex flex-col gap-1.5">
+   483→              <Label>Device</Label>
+   484→              <Select value={deviceId} onValueChange={setDeviceId}>
+   485→                <SelectTrigger><SelectValue placeholder="Any device" /></SelectTrigger>
+   486→                <SelectContent>
+   487→                  <SelectItem value="">Any device</SelectItem>
+   488→                  {devicesList.map((d) => (
+   489→                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+   490→                  ))}
+   491→                </SelectContent>
+   492→              </Select>
+   493→            </div>
+   494→            <div className="flex flex-col gap-1.5">
+   495→              <Label>Sensor Key</Label>
+   496→              <Select value={sensorKey} onValueChange={setSensorKey} disabled={!selectedDevice || sensorOptions.length === 0}>
+   497→                <SelectTrigger><SelectValue placeholder={selectedDevice ? (sensorOptions.length ? 'Pick sensor' : 'No sensors') : 'Pick device first'} /></SelectTrigger>
+   498→                <SelectContent>
+   499→                  <SelectItem value="">Any sensor</SelectItem>
+   500→                  {sensorOptions.map((s) => (
+   501→                    <SelectItem key={s.id} value={s.key}>{s.key}</SelectItem>
+   502→                  ))}
+   503→                </SelectContent>
+   504→              </Select>
+   505→            </div>
+   506→          </div>
+   507→          <div className="grid grid-cols-2 gap-3">
+   508→            <div className="flex flex-col gap-1.5">
+   509→              <Label>Condition</Label>
+   510→              <Select value={condition} onValueChange={(v) => setCondition(v as AlertCondition)}>
+   511→                <SelectTrigger><SelectValue /></SelectTrigger>
+   512→                <SelectContent>
+   513→                  {(Object.keys(CONDITION_LABEL) as AlertCondition[]).map((c) => (
+   514→                    <SelectItem key={c} value={c}>{CONDITION_LABEL[c]}</SelectItem>
+   515→                  ))}
+   516→                </SelectContent>
+   517→              </Select>
+   518→            </div>
+   519→            <div className="flex flex-col gap-1.5">
+   520→              <Label htmlFor="rule-threshold">Threshold</Label>
+   521→              <Input
+   522→                id="rule-threshold"
+   523→                type="number"
+   524→                value={threshold}
+   525→                onChange={(e) => setThreshold(e.target.value)}
+   526→                className="font-mono"
+   527→                placeholder="0"
+   528→              />
+   529→            </div>
+   530→          </div>
+   531→          <div className="flex flex-col gap-1.5">
+   532→            <Label>Severity</Label>
+   533→            <Select value={severity} onValueChange={(v) => setSeverity(v as AlertSeverity)}>
+   534→              <SelectTrigger><SelectValue /></SelectTrigger>
+   535→              <SelectContent>
+   536→                <SelectItem value="INFO">Info</SelectItem>
+   537→                <SelectItem value="WARNING">Warning</SelectItem>
+   538→                <SelectItem value="CRITICAL">Critical</SelectItem>
+   539→              </SelectContent>
+   540→            </Select>
+   541→          </div>
+   542→          {sensorKey && threshold && (
+   543→            <div className="rounded-md border border-border bg-muted/40 p-3">
+   544→              <p className="text-[10px] uppercase tracking-wide text-text-muted mb-1">Preview</p>
+   545→              <code className="font-mono text-xs">
+   546→                {sensorKey} {CONDITION_SYMBOL[condition]} {threshold}
+   547→              </code>
+   548→            </div>
+   549→          )}
+   550→        </div>
+   551→        <DialogFooter>
+   552→          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+   553→          <Button onClick={submit} disabled={saving || !name.trim()}>
+   554→            {saving ? 'Creating...' : 'Create Rule'}
+   555→          </Button>
+   556→        </DialogFooter>
+   557→      </DialogContent>
+   558→    </Dialog>
+   559→  )
+   560→}
+   561→
+   562→// ─────────────────────────────────────────────────────────────────────────────
+   563→// Main view
+   564→// ─────────────────────────────────────────────────────────────────────────────
+   565→
+   566→export function AlertsView() {
+   567→  const qc = useQueryClient()
+   568→  const [newOpen, setNewOpen] = React.useState(false)
+   569→  const [eventFilter, setEventFilter] = React.useState<'all' | AlertStatus>('all')
+   570→  const [busyId, setBusyId] = React.useState<string | null>(null)
+   571→
+   572→  // Always fetch all events (status omitted) so we can filter client-side
+   573→  const { data, isLoading, isError, refetch } = useAlerts(undefined)
+   574→  const events: AlertEventDTO[] = React.useMemo(() => data?.events ?? [], [data])
+   575→  const rules: AlertRuleWithDevice[] = React.useMemo(() => data?.rules ?? [], [data])
+   576→
+   577→  const filteredEvents = React.useMemo(() => {
+   578→    if (eventFilter === 'all') return events
+   579→    return events.filter((e) => e.status === eventFilter)
+   580→  }, [events, eventFilter])
+   581→
+   582→  const triggeredCount = React.useMemo(
+   583→    () => events.filter((e) => e.status === 'TRIGGERED').length,
+   584→    [events]
+   585→  )
+   586→  const acknowledgedCount = React.useMemo(
+   587→    () => events.filter((e) => e.status === 'ACKNOWLEDGED').length,
+   588→    [events]
+   589→  )
+   590→  const resolvedCount = React.useMemo(
+   591→    () => events.filter((e) => e.status === 'RESOLVED').length,
+   592→    [events]
+   593→  )
+   594→  const activeRules = React.useMemo(() => rules.filter((r) => r.enabled).length, [rules])
+   595→
+   596→  const patchEvent = async (id: string, action: 'acknowledge' | 'resolve') => {
+   597→    setBusyId(id)
+   598→    try {
+   599→      const r = await fetch(`/api/alerts/${id}/${action}`, { method: 'PATCH' })
+   600→      if (!r.ok) throw new Error(`Failed to ${action} alert`)
+   601→      toast.success(`Alert ${action === 'acknowledge' ? 'acknowledged' : 'resolved'}`)
+   602→      qc.invalidateQueries({ queryKey: ['alerts'] })
+   603→    } catch (err) {
+   604→      toast.error(`Could not ${action} alert`, {
+   605→        description: err instanceof Error ? err.message : 'Unknown error',
+   606→      })
+   607→    } finally {
+   608→      setBusyId(null)
+   609→    }
+   610→  }
+   611→
+   612→  return (
+   613→    <div className="flex flex-col gap-4 p-4 lg:p-6 min-h-full">
+   614→      {/* Header */}
+   615→      <header className="flex flex-wrap items-start justify-between gap-3">
+   616→        <div className="flex items-center gap-2">
+   617→          <span className="flex size-9 items-center justify-center rounded-xl bg-danger/10 text-danger">
+   618→            <ShieldAlert className="size-5" />
+   619→          </span>
+   620→          <div>
+   621→            <h1 className="text-xl font-semibold tracking-tight">Alerts</h1>
+   622→            <p className="text-xs text-text-muted">Monitor active alert events and configure alerting rules.</p>
+   623→          </div>
+   624→        </div>
+   625→        <div className="flex items-center gap-2">
+   626→          <Button variant="outline" size="sm" onClick={() => refetch()}>
+   627→            <RefreshCw className="size-3.5" /> Refresh
+   628→          </Button>
+   629→          <Button size="sm" onClick={() => setNewOpen(true)}>
+   630→            <Plus className="size-3.5" /> New Alert Rule
+   631→          </Button>
+   632→        </div>
+   633→      </header>
+   634→
+   635→      <NewAlertRuleDialog open={newOpen} onOpenChange={setNewOpen} />
+   636→
+   637→      {/* KPI strip */}
+   638→      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+   639→        <KpiCard label="Triggered" value={triggeredCount} accent="danger" icon={AlertTriangle} />
+   640→        <KpiCard label="Acknowledged" value={acknowledgedCount} accent="warning" icon={Activity} />
+   641→        <KpiCard label="Resolved" value={resolvedCount} accent="success" icon={CheckCircle2} />
+   642→        <KpiCard label="Active Rules" value={activeRules} accent="info" icon={Sliders} />
+   643→      </div>
+   644→
+   645→      {isError ? (
+   646→        <Card className="p-6 text-center">
+   647→          <p className="text-sm font-medium text-danger">Failed to load alerts.</p>
+   648→          <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>Try again</Button>
+   649→        </Card>
+   650→      ) : (
+   651→        <div className="flex flex-col gap-6">
+   652→          {/* ─── Active Alert Events ─── */}
+   653→          <section className="flex flex-col gap-3">
+   654→            <div className="flex items-center justify-between gap-3">
+   655→              <div className="flex items-center gap-2">
+   656→                <Activity className="size-4 text-text-muted" />
+   657→                <h2 className="text-sm font-semibold">Alert Events</h2>
+   658→                <span className="text-xs text-text-muted">
+   659→                  {events.length} total · {triggeredCount} active
+   660→                </span>
+   661→              </div>
+   662→            </div>
+   663→
+   664→            {/* Event filter tabs */}
+   665→            <Tabs value={eventFilter} onValueChange={(v) => setEventFilter(v as typeof eventFilter)}>
+   666→              <TabsList className="w-full justify-start overflow-x-auto">
+   667→                <TabsTrigger value="all">All ({events.length})</TabsTrigger>
+   668→                <TabsTrigger value="TRIGGERED">Triggered ({triggeredCount})</TabsTrigger>
+   669→                <TabsTrigger value="ACKNOWLEDGED">Acknowledged ({acknowledgedCount})</TabsTrigger>
+   670→                <TabsTrigger value="RESOLVED">Resolved ({resolvedCount})</TabsTrigger>
+   671→              </TabsList>
+   672→              <TabsContent value={eventFilter} className="mt-3">
+   673→                {isLoading ? (
+   674→                  <div className="flex flex-col gap-3">
+   675→                    <AlertEventSkeleton />
+   676→                    <AlertEventSkeleton />
+   677→                    <AlertEventSkeleton />
+   678→                  </div>
+   679→                ) : filteredEvents.length === 0 ? (
+   680→                  <Card className="p-8 text-center">
+   681→                    <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-muted text-text-muted">
+   682→                      <CheckCircle2 className="size-5" />
+   683→                    </div>
+   684→                    <p className="text-sm font-medium">
+   685→                      {eventFilter === 'all' ? 'No alert events yet' : `No ${eventFilter.toLowerCase()} events`}
+   686→                    </p>
+   687→                    <p className="mt-1 text-xs text-text-muted">
+   688→                      {eventFilter === 'all'
+   689→                        ? 'Alert events will appear here when rules trigger.'
+   690→                        : 'Try a different filter or wait for new activity.'}
+   691→                    </p>
+   692→                  </Card>
+   693→                ) : (
+   694→                  <div className="flex flex-col gap-3 max-h-[640px] overflow-y-auto pr-1 aether-scroll">
+   695→                    {filteredEvents.map((event) => (
+   696→                      <AlertEventRow
+   697→                        key={event.id}
+   698→                        event={event}
+   699→                        onAcknowledge={(id) => patchEvent(id, 'acknowledge')}
+   700→                        onResolve={(id) => patchEvent(id, 'resolve')}
+   701→                        busy={busyId === event.id}
+   702→                      />
+   703→                    ))}
+   704→                  </div>
+   705→                )}
+   706→              </TabsContent>
+   707→            </Tabs>
+   708→          </section>
+   709→
+   710→          {/* ─── Alert Rules ─── */}
+   711→          <section className="flex flex-col gap-3">
+   712→            <div className="flex items-center justify-between gap-3">
+   713→              <div className="flex items-center gap-2">
+   714→                <Sliders className="size-4 text-text-muted" />
+   715→                <h2 className="text-sm font-semibold">Alert Rules</h2>
+   716→                <span className="text-xs text-text-muted">
+   717→                  {rules.length} configured · {activeRules} active
+   718→                </span>
+   719→              </div>
+   720→            </div>
+   721→
+   722→            {isLoading ? (
+   723→              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+   724→                <AlertRuleSkeleton />
+   725→                <AlertRuleSkeleton />
+   726→                <AlertRuleSkeleton />
+   727→                <AlertRuleSkeleton />
+   728→              </div>
+   729→            ) : rules.length === 0 ? (
+   730→              <Card className="p-8 text-center">
+   731→                <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-xl bg-muted text-text-muted">
+   732→                  <Sliders className="size-5" />
+   733→                </div>
+   734→                <p className="text-sm font-medium">No alert rules configured</p>
+   735→                <p className="mt-1 text-xs text-text-muted">Create a rule to start receiving alerts when conditions breach.</p>
+   736→                <Button size="sm" className="mt-4" onClick={() => setNewOpen(true)}>
+   737→                  <Plus className="size-3.5" /> New Alert Rule
+   738→                </Button>
+   739→              </Card>
+   740→            ) : (
+   741→              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+   742→                {rules.map((rule) => (
+   743→                  <AlertRuleCard key={rule.id} rule={rule} />
+   744→                ))}
+   745→              </div>
+   746→            )}
+   747→          </section>
+   748→        </div>
+   749→      )}
+   750→    </div>
+   751→  )
+   752→}
+   753→
+   754→function KpiCard({
+   755→  label,
+   756→  value,
+   757→  accent,
+   758→  icon: Icon,
+   759→}: {
+   760→  label: string
+   761→  value: number
+   762→  accent: 'primary' | 'success' | 'warning' | 'danger' | 'info'
+   763→  icon: typeof Activity
+   764→}) {
+   765→  const accentClass: Record<typeof accent, string> = {
+   766→    primary: 'text-primary bg-primary/10',
+   767→    success: 'text-success bg-success/10',
+   768→    warning: 'text-warning bg-warning/10',
+   769→    danger: 'text-danger bg-danger/10',
+   770→    info: 'text-info bg-info/10',
+   771→  }
+   772→  return (
+   773→    <Card className="p-4 gap-2">
+   774→      <div className="flex items-center justify-between gap-2">
+   775→        <span className={cn('flex size-8 items-center justify-center rounded-lg', accentClass[accent])}>
+   776→          <Icon className="size-4" />
+   777→        </span>
+   778→        <span className="text-2xl font-semibold tabular-nums">{value}</span>
+   779→      </div>
+   780→      <p className="text-xs text-text-muted">{label}</p>
+   781→    </Card>
+   782→  )
+   783→}
+   784→
+   785→export default AlertsView
+   786→

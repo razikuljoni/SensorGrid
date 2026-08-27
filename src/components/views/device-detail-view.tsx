@@ -108,7 +108,7 @@ export function DeviceDetailView() {
 function NoSelectionPlaceholder() {
   const setView = useAppStore((s) => s.setView)
   return (
-    <Card className="flex flex-col items-center gap-3 p-12 text-center">
+    <Card className="flex flex-col items-center gap-3 p-12 text-center mx-4 my-4 sm:mx-6 sm:my-6">
       <div className="flex size-14 items-center justify-center rounded-full bg-muted text-text-muted">
         <Cpu className="size-6" />
       </div>
@@ -138,7 +138,7 @@ function DeviceDetailContent({
 
   if (isError) {
     return (
-      <Card className="flex flex-col items-center gap-3 p-12 text-center">
+      <Card className="flex flex-col items-center gap-3 p-12 text-center mx-4 my-4 sm:mx-6 sm:my-6">
         <div className="flex size-12 items-center justify-center rounded-full bg-danger/10 text-danger">
           <AlertTriangle className="size-5" />
         </div>
@@ -156,7 +156,7 @@ function DeviceDetailContent({
   if (isLoading || !device) return <DetailSkeleton onBack={onBack} />
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 p-4 sm:gap-6 sm:p-6">
       <DetailTopBar device={device} onBack={onBack} />
       <Tabs value={tab} onValueChange={setTab} className="gap-4">
         <TabsList className="w-fit overflow-x-auto">
@@ -1031,7 +1031,7 @@ function KpiCard({
 // ─── Detail skeleton ─────────────────────────────────────────────────────────
 function DetailSkeleton({ onBack }: { onBack: () => void }) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 p-4 sm:gap-6 sm:p-6">
       <div className="flex items-start gap-4">
         <Button variant="ghost" size="icon" onClick={onBack} aria-label="Back">
           <ArrowLeft className="size-4" />
@@ -1044,7 +1044,7 @@ function DetailSkeleton({ onBack }: { onBack: () => void }) {
         </div>
       </div>
       <Skeleton className="h-9 w-full max-w-md rounded-lg" />
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-24" />
         ))}

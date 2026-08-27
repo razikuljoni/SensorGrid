@@ -147,19 +147,20 @@ function DashboardDeviceCard({ device }: { device: DeviceDTO }) {
       className="group relative flex h-full w-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition-colors hover:border-border-subtle hover:bg-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       {/* Top: orb + identity */}
-      <div className="flex items-start gap-3">
-        <DeviceOrb
-          status={device.status}
-          battery={device.battery}
-          signal={device.signal}
-          size={56}
-          sublabel
-          active={device.status === 'ONLINE' || device.status === 'WARNING'}
-        />
+      <div className="flex items-start gap-2.5 sm:gap-3">
+        <div className="shrink-0">
+          <DeviceOrb
+            status={device.status}
+            battery={device.battery}
+            signal={device.signal}
+            size={48}
+            active={device.status === 'ONLINE' || device.status === 'WARNING'}
+          />
+        </div>
         <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold tracking-tight">{device.name}</p>
+          <div className="flex items-start justify-between gap-1.5">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold tracking-tight leading-snug break-words">{device.name}</p>
               <p className="mt-0.5 flex items-center gap-1 text-xs text-text-muted">
                 <MapPin className="size-3 shrink-0" />
                 <span className="truncate">
@@ -175,9 +176,9 @@ function DashboardDeviceCard({ device }: { device: DeviceDTO }) {
         </div>
       </div>
 
-      {/* Telemetry tiles */}
+      {/* Telemetry tiles — 2 cols on narrow screens, 3 when there's room */}
       {readings.length > 0 ? (
-        <div className="grid grid-cols-3 gap-2">
+        <div className={cn('grid gap-2', readings.length <= 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')}>
           {readings.map((r) => (
             <TelemetryTile
               key={r.key}
@@ -185,7 +186,7 @@ function DashboardDeviceCard({ device }: { device: DeviceDTO }) {
               label={r.label}
               value={r.value}
               unit={r.unit}
-              className="px-2 py-2"
+              compact
             />
           ))}
         </div>
@@ -196,10 +197,10 @@ function DashboardDeviceCard({ device }: { device: DeviceDTO }) {
       )}
 
       {/* Footer tags */}
-      <div className="mt-auto flex items-center justify-between text-[10px] text-text-muted">
-        <span className="font-mono uppercase tracking-wide">{device.type}</span>
+      <div className="mt-auto flex items-center justify-between gap-2 text-[10px] text-text-muted">
+        <span className="font-mono uppercase tracking-wide shrink-0">{device.type}</span>
         {device.tags.length > 0 ? (
-          <span className="truncate pl-2">#{device.tags.slice(0, 2).join(' #')}</span>
+          <span className="truncate">#{device.tags.slice(0, 2).join(' #')}</span>
         ) : (
           <span className="text-text-muted/60">{device.id.slice(0, 8)}</span>
         )}
@@ -212,11 +213,11 @@ function DashboardDeviceCard({ device }: { device: DeviceDTO }) {
 
 function KpiSkeletonRow() {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5">
       {Array.from({ length: 5 }).map((_, i) => (
-        <Card key={i} className="p-4">
+        <Card key={i} className="p-3 sm:p-4">
           <div className="flex items-start gap-3">
-            <Skeleton className="size-9 rounded-xl" />
+            <Skeleton className="size-8 sm:size-9 rounded-xl" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-3 w-20" />
               <Skeleton className="h-6 w-16" />
@@ -412,7 +413,7 @@ export default function DashboardView() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col gap-6 p-4 sm:p-6">
+    <div className="min-h-screen flex flex-col gap-4 p-4 sm:gap-6 sm:p-6">
       {/* ─── Header ─── */}
       <motion.header
         initial={{ opacity: 0, y: -4 }}
@@ -449,7 +450,7 @@ export default function DashboardView() {
           variants={container}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+          className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5"
         >
           <motion.div variants={item}>
             <PulseCard
@@ -539,7 +540,7 @@ export default function DashboardView() {
               </div>
               <Skeleton className="h-4 w-12" />
             </div>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-5">
               {Array.from({ length: 5 }).map((_, i) => (
                 <Skeleton key={i} className="h-20" />
               ))}

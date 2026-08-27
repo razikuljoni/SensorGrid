@@ -1074,7 +1074,7 @@ export function AutomationsView() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 lg:p-6 min-h-full">
+    <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
       {/* Header */}
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -1123,7 +1123,7 @@ export function AutomationsView() {
           <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>Try again</Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[360px_1fr]">
           {/* LEFT: List */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
@@ -1167,7 +1167,7 @@ export function AutomationsView() {
           </div>
 
           {/* RIGHT: Canvas */}
-          <div className="flex flex-col min-h-[600px]">
+          <div className="flex flex-col min-h-[400px] sm:min-h-[500px] lg:min-h-[600px]">
             {selected ? (
               <Card className="flex-1 overflow-hidden p-0 gap-0">
                 <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
@@ -1188,7 +1188,7 @@ export function AutomationsView() {
                   </div>
                 </div>
                 {/* Desktop canvas */}
-                <div className="hidden lg:block h-[calc(100vh-14rem)]">
+                <div className="hidden lg:block h-[calc(100vh-14rem)] min-h-[600px]">
                   <RuleCanvas automation={selected} onSaved={() => qc.invalidateQueries({ queryKey: qk.automations })} />
                 </div>
                 {/* Mobile canvas preview (collapsed) */}

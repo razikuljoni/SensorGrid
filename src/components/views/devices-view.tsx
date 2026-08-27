@@ -91,10 +91,10 @@ export function DevicesView() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 p-4 sm:gap-6 sm:p-6">
       {/* Header */}
       <header className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Devices</h1>
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Devices</h1>
         <p className="text-sm text-text-muted">
           Monitor, command, and inspect every device in your fleet.
         </p>
@@ -229,7 +229,7 @@ function DevicesBody({
 }) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
         {Array.from({ length: 6 }).map((_, i) => (
           <DeviceCardSkeleton key={i} />
         ))}
@@ -271,7 +271,7 @@ function DevicesBody({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
       {devices.map((d) => (
         <DeviceCard key={d.id} device={d} onOpen={() => onOpen(d.id)} />
       ))}

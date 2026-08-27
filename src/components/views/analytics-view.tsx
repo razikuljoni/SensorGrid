@@ -155,7 +155,7 @@ export default function AnalyticsView() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col gap-6 p-4 sm:p-6">
+    <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
       {/* ─── Header + range ─── */}
       <motion.header
         initial={{ opacity: 0, y: -4 }}
@@ -226,7 +226,7 @@ export default function AnalyticsView() {
       </motion.section>
 
       {/* ─── Charts ─── */}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         {/* Hourly volume */}
         <Card>
           <CardHeader className="pb-2">

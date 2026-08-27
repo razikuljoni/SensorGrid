@@ -16,7 +16,7 @@ export function SettingsView() {
   const stats = data?.stats
 
   return (
-    <div className="min-h-screen flex flex-col gap-4 p-4 sm:p-6 max-w-5xl">
+    <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6 max-w-5xl">
       {/* Organization */}
       <Card>
         <CardHeader>

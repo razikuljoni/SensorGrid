@@ -37,8 +37,8 @@ export function ActivityView() {
   }, [data, q])
 
   return (
-    <div className="min-h-screen flex flex-col gap-4 p-4 sm:p-6">
-      <Card className="flex-1 flex flex-col min-h-0">
+    <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
+      <Card className="flex-1 flex flex-col min-h-0 mx-auto w-full max-w-6xl">
         <CardHeader className="border-b border-border space-y-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-base flex items-center gap-2">

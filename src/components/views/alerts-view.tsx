@@ -610,7 +610,7 @@ export function AlertsView() {
   }
 
   return (
-    <div className="flex flex-col gap-4 p-4 lg:p-6 min-h-full">
+    <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
       {/* Header */}
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -635,7 +635,7 @@ export function AlertsView() {
       <NewAlertRuleDialog open={newOpen} onOpenChange={setNewOpen} />
 
       {/* KPI strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         <KpiCard label="Triggered" value={triggeredCount} accent="danger" icon={AlertTriangle} />
         <KpiCard label="Acknowledged" value={acknowledgedCount} accent="warning" icon={Activity} />
         <KpiCard label="Resolved" value={resolvedCount} accent="success" icon={CheckCircle2} />
@@ -720,7 +720,7 @@ export function AlertsView() {
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <AlertRuleSkeleton />
                 <AlertRuleSkeleton />
                 <AlertRuleSkeleton />
@@ -738,7 +738,7 @@ export function AlertsView() {
                 </Button>
               </Card>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {rules.map((rule) => (
                   <AlertRuleCard key={rule.id} rule={rule} />
                 ))}
