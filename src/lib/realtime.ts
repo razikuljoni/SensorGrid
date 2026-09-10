@@ -5,9 +5,9 @@ import { io, Socket } from 'socket.io-client'
 import type { ServerSocketEvent } from './types'
 
 // Single shared socket connection to the realtime mini-service.
-// The mini-service runs on port 3003 and is reached through the Caddy gateway
-// using the XTransformPort query parameter.
-const REALTIME_PORT = 3003
+// In production (Vercel), connects to the external realtime service via REALTIME_URL env var.
+// In local dev, connects to localhost:3003 via Caddy gateway (XTransformPort).
+const REALTIME_URL = process.env.NEXT_PUBLIC_REALTIME_URL || ''
 
 export function useRealtimeSocket(handler: (event: ServerSocketEvent) => void) {
   const socketRef = useRef<Socket | null>(null)
@@ -20,7 +20,10 @@ export function useRealtimeSocket(handler: (event: ServerSocketEvent) => void) {
   }, [handler])
 
   useEffect(() => {
-    const socket = io(`/?XTransformPort=${REALTIME_PORT}`, {
+    // Production: connect to external realtime service URL
+    // Local dev: connect via Caddy gateway (XTransformPort)
+    const url = REALTIME_URL || `/?XTransformPort=3003`
+    const socket = io(url, {
       transports: ['websocket', 'polling'],
       forceNew: true,
       reconnection: true,
@@ -56,7 +59,8 @@ let _singletonSocket: Socket | null = null
 export function getRealtimeSocket(): Socket | null {
   if (typeof window === 'undefined') return null
   if (!_singletonSocket) {
-    _singletonSocket = io(`/?XTransformPort=${REALTIME_PORT}`, {
+    const url = REALTIME_URL || `/?XTransformPort=3003`
+    _singletonSocket = io(url, {
       transports: ['websocket', 'polling'],
       forceNew: false,
       reconnection: true,

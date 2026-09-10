@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -68,11 +69,10 @@ tool-results/
 .omo/
 
 # Lockfiles — pnpm is the preferred package manager (source of truth).
-# Keep pnpm-lock.yaml tracked; ignore alternates (bun/npm/yarn) so multiple
+# Keep pnpm-lock.yaml tracked; ignore alternates so multiple
 # package managers never fight over the dependency graph on one machine.
 bun.lock
 bun.lockb
-package-lock.json
 yarn.lock
 
 # Local run artifacts
