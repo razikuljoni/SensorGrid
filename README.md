@@ -430,21 +430,21 @@ Before deploying, ensure:
 - [ ] CORS headers are restricted to your domain
 - [ ] Rate limiting is enabled on auth + command endpoints
 
-### Vercel / Netlify Deployment Notes
+### Production Deployment (Vercel + Neon)
 
-This app uses a **socket.io mini-service** for realtime, which requires a persistent process. Serverless platforms (Vercel, Netlify) don't support long-running socket connections natively. For serverless deployment:
+SensorGrid is deployed live on Vercel with single-platform, 100% free serverless architecture:
 
-1. Deploy the Next.js app to Vercel
-2. Deploy the realtime mini-service to a container platform (Railway, Render, Fly.io)
-3. Update `REALTIME_PORT` and the socket.io connection URL in `src/lib/realtime.ts`
-4. Use a managed PostgreSQL (Supabase, Neon) instead of SQLite
+- **Live App**: [https://sensor-grid-gamma.vercel.app](https://sensor-grid-gamma.vercel.app)
+- **Database**: Managed Neon PostgreSQL attached to Vercel project (`DATABASE_URL`)
+- **Realtime Engine**: Serverless SSE (Server-Sent Events) in-app driver (`/api/realtime`) with outbox pattern (`RealtimeEvent` table) + auto-reconnecting browser `EventSource`
+- **Framework**: Next.js 16 (App Router) + Prisma 6 + Tailwind CSS
 
-### Health Check
+### Health Check & Live Endpoints
 
-Both services expose health endpoints:
-
-- **Web**: `GET /api` — returns API metadata
-- **Realtime**: socket.io connection on port 3003 — check `connected` event
+- **Live Dashboard**: [https://sensor-grid-gamma.vercel.app](https://sensor-grid-gamma.vercel.app)
+- **API Health & Metadata**: `GET /api` — [https://sensor-grid-gamma.vercel.app/api](https://sensor-grid-gamma.vercel.app/api)
+- **Dashboard Stats & Fleet API**: `GET /api/dashboard` — [https://sensor-grid-gamma.vercel.app/api/dashboard](https://sensor-grid-gamma.vercel.app/api/dashboard)
+- **SSE Stream**: `GET /api/realtime` — [https://sensor-grid-gamma.vercel.app/api/realtime](https://sensor-grid-gamma.vercel.app/api/realtime)
 
 ---
 
