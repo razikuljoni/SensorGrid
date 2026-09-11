@@ -388,3 +388,16 @@ model AuditLog {
   @@index([organizationId, createdAt])
   @@index([action])
 }
+
+// ---------------------------------------------------------------------------
+// Realtime Event Outbox (for SSE streaming on serverless)
+// ---------------------------------------------------------------------------
+
+model RealtimeEvent {
+  id        String   @id @default(cuid())
+  type      String
+  payload   String   // JSON stringified ServerSocketEvent
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
