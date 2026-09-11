@@ -3,10 +3,5 @@
   "outputDirectory": ".next",
   "framework": "nextjs",
   "installCommand": "npm install",
-  "env": {
-    "DATABASE_URL": "@database-url",
-    "NEXT_PUBLIC_APP_URL": "@next-public-app-url",
-    "REALTIME_URL": "@realtime-url"
-  },
   "regions": ["iad1"]
 }
