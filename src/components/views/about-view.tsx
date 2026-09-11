@@ -7,8 +7,8 @@ import { Activity, Cpu, Gauge, Layers, Radio, Terminal, Zap } from 'lucide-react
 
 const STACK = [
   { group: 'Frontend', items: ['Next.js 16', 'React 19', 'TypeScript 5', 'Tailwind CSS 4', 'shadcn/ui', 'TanStack Query', 'Zustand', 'Recharts', '@xyflow/react', 'Framer Motion'] },
-  { group: 'Backend', items: ['Next.js API Routes', 'Prisma ORM', 'SQLite', 'Zod', 'socket.io'] },
-  { group: 'Realtime', items: ['socket.io mini-service', 'Telemetry simulator', 'Automation engine', 'Alert evaluator'] },
+  { group: 'Backend', items: ['Next.js API Routes', 'Prisma ORM', 'PostgreSQL', 'Zod', 'Server-Sent Events'] },
+  { group: 'Realtime', items: ['SSE in-app engine', 'Telemetry simulator', 'Automation engine', 'Alert evaluator'] },
   { group: 'Design', items: ['Aether Grid design system', 'Deep indigo primary', 'Electric cyan accent', 'Soft violet secondary', 'Dark + light themes'] },
 ]
 

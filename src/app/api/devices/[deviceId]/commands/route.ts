@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { toCommandDTO, ok, error, DEMO_ORG_ID, DEMO_USER_NAME } from '@/lib/api'
-import { getRealtimeSocketSafe } from '@/lib/realtime-server'
+import { executeCommand } from '@/lib/engine'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,31 +26,8 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ deviceId: 
   if (!device) return error('Device not found', 404)
   if (device.status === 'OFFLINE') return error('Device is offline — cannot send command', 409)
 
-  // Persist the command record (status PENDING)
-  const command = await db.command.create({
-    data: {
-      deviceId,
-      senderName: DEMO_USER_NAME,
-      payload: JSON.stringify(payload),
-      topic: `sensorgrid/sensorgrid-hq/${deviceId}/command`,
-      status: 'PENDING',
-    },
-  })
-
-  await db.auditLog.create({
-    data: {
-      organizationId: DEMO_ORG_ID,
-      actorName: DEMO_USER_NAME,
-      action: 'device.command',
-      targetType: 'COMMAND',
-      targetId: deviceId,
-      targetName: device.name,
-      metadata: JSON.stringify({ commandId: command.id, payload }),
-    },
-  })
-
-  // Forward to the realtime service which simulates the device ack
-  getRealtimeSocketSafe()?.emit('command.send', { deviceId, payload })
+  const command = await executeCommand(deviceId, payload, DEMO_USER_NAME)
+  if (!command) return error('Failed to execute command', 500)
 
   return ok(toCommandDTO(command))
 }
