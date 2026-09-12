@@ -1,15 +1,23 @@
-import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { toDeviceDTO, DEMO_ORG_ID } from '@/lib/api'
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { toDeviceDTO, DEMO_ORG_ID } from '@/lib/api';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 // GET /api/dashboard — aggregated stats + environment snapshot + recent activity
 export async function GET() {
-  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000)
-  const since1h = new Date(Date.now() - 60 * 60 * 1000)
+  const since24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const since1h = new Date(Date.now() - 60 * 60 * 1000);
 
-  const [devices, activeAlerts, automationsToday, telemetryToday, commandsToday, recentAudits, recentAlerts] = await Promise.all([
+  const [
+    devices,
+    activeAlerts,
+    automationsToday,
+    telemetryToday,
+    commandsToday,
+    recentAudits,
+    recentAlerts,
+  ] = await Promise.all([
     db.device.findMany({
       where: { organizationId: DEMO_ORG_ID },
       include: { location: true, sensors: true, twin: true },
@@ -29,12 +37,14 @@ export async function GET() {
       take: 6,
       include: { device: { select: { id: true, name: true } } },
     }),
-  ])
+  ]);
 
-  const onlineDevices = devices.filter((d) => d.status === 'ONLINE').length
-  const offlineDevices = devices.filter((d) => d.status === 'OFFLINE').length
-  const warningDevices = devices.filter((d) => d.status === 'WARNING' || d.status === 'CRITICAL').length
-  const criticalDevices = devices.filter((d) => d.status === 'CRITICAL').length
+  const onlineDevices = devices.filter((d) => d.status === 'ONLINE').length;
+  const offlineDevices = devices.filter((d) => d.status === 'OFFLINE').length;
+  const warningDevices = devices.filter(
+    (d) => d.status === 'WARNING' || d.status === 'CRITICAL'
+  ).length;
+  const criticalDevices = devices.filter((d) => d.status === 'CRITICAL').length;
 
   // Environment snapshot — average temperature/humidity/pressure/light/co2 across online devices
   const env: Record<string, { sum: number; count: number }> = {
@@ -43,18 +53,18 @@ export async function GET() {
     pressure: { sum: 0, count: 0 },
     light: { sum: 0, count: 0 },
     co2: { sum: 0, count: 0 },
-  }
-  let envSourceDevice: { id: string; name: string } | null = null
+  };
+  let envSourceDevice: { id: string; name: string } | null = null;
   for (const d of devices) {
-    if (d.status !== 'ONLINE' && d.status !== 'WARNING') continue
-    const twin = d.twin
-    if (!twin) continue
-    const reported = JSON.parse(twin.reported || '{}')
+    if (d.status !== 'ONLINE' && d.status !== 'WARNING') continue;
+    const twin = d.twin;
+    if (!twin) continue;
+    const reported = JSON.parse(twin.reported || '{}');
     for (const key of Object.keys(env)) {
       if (typeof reported[key] === 'number' && !Number.isNaN(reported[key])) {
-        env[key].sum += reported[key]
-        env[key].count += 1
-        if (!envSourceDevice) envSourceDevice = { id: d.id, name: d.name }
+        env[key].sum += reported[key];
+        env[key].count += 1;
+        if (!envSourceDevice) envSourceDevice = { id: d.id, name: d.name };
       }
     }
   }
@@ -99,5 +109,5 @@ export async function GET() {
       triggeredAt: a.triggeredAt.toISOString(),
       device: a.device ? { id: a.device.id, name: a.device.name } : null,
     })),
-  })
+  });
 }

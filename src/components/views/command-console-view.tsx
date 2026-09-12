@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SensorGrid — Command Console View (Task 13-combined)
@@ -7,10 +7,10 @@
 // useDeviceCommands() + useRealtimeNotifications() + sonner toasts.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as React from 'react'
-import { motion } from 'framer-motion'
-import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import * as React from 'react';
+import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   AlertCircle,
   CheckCircle2,
@@ -21,41 +21,32 @@ import {
   Sparkles,
   Terminal,
   Zap,
-} from 'lucide-react'
+} from 'lucide-react';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Textarea } from '@/components/ui/textarea'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 
-import {
-  COMMAND_STATUS_META,
-  formatTime,
-  timeAgo,
-} from '@/lib/status'
-import {
-  qk,
-  useDeviceCommands,
-  useDevices,
-  useRealtimeNotifications,
-} from '@/lib/hooks'
-import { cn } from '@/lib/utils'
-import type { CommandDTO, CommandStatus } from '@/lib/types'
+import { COMMAND_STATUS_META, formatTime, timeAgo } from '@/lib/status';
+import { qk, useDeviceCommands, useDevices, useRealtimeNotifications } from '@/lib/hooks';
+import { cn } from '@/lib/utils';
+import type { CommandDTO, CommandStatus } from '@/lib/types';
 
 // ─── Presets + Templates ────────────────────────────────────────────────────
 
 interface Preset {
-  label: string
-  payload: Record<string, unknown>
+  label: string;
+  payload: Record<string, unknown>;
 }
 
 const PRESETS: Preset[] = [
@@ -65,12 +56,12 @@ const PRESETS: Preset[] = [
   { label: 'Vent: Open', payload: { vent: true } },
   { label: 'Reboot device', payload: { reboot: true } },
   { label: 'Report state', payload: { reportState: true } },
-]
+];
 
 interface Template {
-  name: string
-  description: string
-  payload: Record<string, unknown>
+  name: string;
+  description: string;
+  payload: Record<string, unknown>;
 }
 
 const TEMPLATES: Template[] = [
@@ -89,118 +80,121 @@ const TEMPLATES: Template[] = [
     description: 'Request a firmware health report from the ESP32 device.',
     payload: { diagnostics: true, include: ['heap', 'uptime', 'wifi_rssi'] },
   },
-]
+];
 
 // ─── Command status badge ────────────────────────────────────────────────────
 
 function CommandStatusBadge({ status }: { status: CommandStatus }) {
-  const meta = COMMAND_STATUS_META[status] ?? COMMAND_STATUS_META.PENDING
-  const Icon = meta.icon
+  const meta = COMMAND_STATUS_META[status] ?? COMMAND_STATUS_META.PENDING;
+  const Icon = meta.icon;
   return (
     <span
       className={cn(
         'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-medium whitespace-nowrap',
         meta.color,
         meta.bg,
-        meta.border,
+        meta.border
       )}
     >
       <Icon className="size-3" />
       {meta.label}
     </span>
-  )
+  );
 }
 
 // ─── JSON validation hook ─────────────────────────────────────────────────────
 
-function useJsonValidation(text: string): { parsed: Record<string, unknown> | null; error: string | null } {
+function useJsonValidation(text: string): {
+  parsed: Record<string, unknown> | null;
+  error: string | null;
+} {
   return React.useMemo(() => {
-    const trimmed = text.trim()
-    if (!trimmed) return { parsed: null, error: 'Payload cannot be empty.' }
+    const trimmed = text.trim();
+    if (!trimmed) return { parsed: null, error: 'Payload cannot be empty.' };
     try {
-      const value = JSON.parse(trimmed)
+      const value = JSON.parse(trimmed);
       if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-        return { parsed: null, error: 'Payload must be a JSON object (e.g. { "fan": true }).' }
+        return { parsed: null, error: 'Payload must be a JSON object (e.g. { "fan": true }).' };
       }
-      return { parsed: value as Record<string, unknown>, error: null }
+      return { parsed: value as Record<string, unknown>, error: null };
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : 'Invalid JSON'
-      return { parsed: null, error: msg }
+      const msg = e instanceof Error ? e.message : 'Invalid JSON';
+      return { parsed: null, error: msg };
     }
-  }, [text])
+  }, [text]);
 }
 
 // ─── View ────────────────────────────────────────────────────────────────────
 
 export default function CommandConsoleView() {
   // Realtime subscription auto-invalidates command history on each transition.
-  useRealtimeNotifications()
-  const qc = useQueryClient()
+  useRealtimeNotifications();
+  const qc = useQueryClient();
 
-  const devices = useDevices()
-  const [deviceId, setDeviceId] = React.useState<string | null>(null)
-  const [payloadText, setPayloadText] = React.useState<string>('{}')
-  const [sending, setSending] = React.useState<boolean>(false)
+  const devices = useDevices();
+  const [deviceId, setDeviceId] = React.useState<string | null>(null);
+  const [payloadText, setPayloadText] = React.useState<string>('{}');
+  const [sending, setSending] = React.useState<boolean>(false);
 
   // Auto-pick first device once the list loads.
   React.useEffect(() => {
     if (!deviceId && devices.data && devices.data.length > 0) {
-      setDeviceId(devices.data[0].id)
+      setDeviceId(devices.data[0].id);
     }
-  }, [deviceId, devices.data])
+  }, [deviceId, devices.data]);
 
-  const commands = useDeviceCommands(deviceId)
-  const { parsed, error } = useJsonValidation(payloadText)
+  const commands = useDeviceCommands(deviceId);
+  const { parsed, error } = useJsonValidation(payloadText);
 
-  const selectedDevice = devices.data?.find((d) => d.id === deviceId)
-  const deviceOffline = selectedDevice?.status === 'OFFLINE'
+  const selectedDevice = devices.data?.find((d) => d.id === deviceId);
+  const deviceOffline = selectedDevice?.status === 'OFFLINE';
 
   // ─── Send command ────────────────────────────────────────────────────────
   const sendPayload = React.useCallback(
     async (payload: Record<string, unknown>) => {
       if (!deviceId) {
-        toast.error('Select a device first.')
-        return
+        toast.error('Select a device first.');
+        return;
       }
-      setSending(true)
+      setSending(true);
       try {
         const r = await fetch(`/api/devices/${deviceId}/commands`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ payload }),
-        })
-        const j = await r.json()
+        });
+        const j = await r.json();
         if (!r.ok) {
-          throw new Error(j?.error ?? `Request failed (${r.status})`)
+          throw new Error(j?.error ?? `Request failed (${r.status})`);
         }
         toast.success('Command dispatched', {
           description: `Payload delivered to ${selectedDevice?.name ?? 'device'}.`,
-        })
+        });
         // Nudge the history query immediately — realtime invalidation will catch status updates.
-        qc.invalidateQueries({ queryKey: qk.deviceCommands(deviceId) })
+        qc.invalidateQueries({ queryKey: qk.deviceCommands(deviceId) });
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : 'Unknown error'
-        toast.error('Failed to send command', { description: msg })
+        const msg = e instanceof Error ? e.message : 'Unknown error';
+        toast.error('Failed to send command', { description: msg });
       } finally {
-        setSending(false)
+        setSending(false);
       }
     },
-    [deviceId, selectedDevice, qc],
-  )
+    [deviceId, selectedDevice, qc]
+  );
 
   function applyPreset(p: Record<string, unknown>) {
-    setPayloadText(JSON.stringify(p, null, 2))
+    setPayloadText(JSON.stringify(p, null, 2));
   }
 
   // ─── Entrance animations ──────────────────────────────────────────────────
   const container = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.05 } },
-  }
+  };
   const item = {
     hidden: { opacity: 0, y: 6 },
     show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
-  }
+  };
 
   return (
     <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
@@ -218,19 +212,14 @@ export default function CommandConsoleView() {
         </div>
         <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">Command Console</h1>
         <p className="text-sm text-text-muted">
-          Developer control plane — dispatch raw JSON payloads and watch acknowledgements arrive
-          in real time.
+          Developer control plane — dispatch raw JSON payloads and watch acknowledgements arrive in
+          real time.
         </p>
       </motion.header>
 
       <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
         {/* ─── Left column: composer + presets + templates ─── */}
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="space-y-4"
-        >
+        <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
           {/* Composer */}
           <motion.div variants={item}>
             <Card>
@@ -298,7 +287,7 @@ export default function CommandConsoleView() {
                     spellCheck={false}
                     className={cn(
                       'min-h-[160px] resize-y font-mono text-xs',
-                      error && 'border-danger focus-visible:ring-danger/20',
+                      error && 'border-danger focus-visible:ring-danger/20'
                     )}
                     placeholder='{ "fan": true, "brightness": 80 }'
                     aria-invalid={!!error}
@@ -383,10 +372,7 @@ export default function CommandConsoleView() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {TEMPLATES.map((t) => (
-                  <div
-                    key={t.name}
-                    className="rounded-lg border border-border bg-surface p-3"
-                  >
+                  <div key={t.name} className="rounded-lg border border-border bg-surface p-3">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-xs font-medium">{t.name}</span>
                       <Button
@@ -400,7 +386,7 @@ export default function CommandConsoleView() {
                     </div>
                     <p className="mt-1 text-[11px] text-text-muted">{t.description}</p>
                     <pre className="mt-2 overflow-x-auto rounded-md bg-muted/60 p-2 font-mono text-[10px] text-text-secondary">
-{JSON.stringify(t.payload, null, 2)}
+                      {JSON.stringify(t.payload, null, 2)}
                     </pre>
                   </div>
                 ))}
@@ -426,8 +412,8 @@ export default function CommandConsoleView() {
                   <CardDescription className="mt-1 text-xs">
                     {selectedDevice ? (
                       <>
-                        <span className="truncate">{selectedDevice.name}</span>{' '}
-                        · {commands.data?.length ?? 0} recent
+                        <span className="truncate">{selectedDevice.name}</span> ·{' '}
+                        {commands.data?.length ?? 0} recent
                       </>
                     ) : (
                       'Select a device to view its history'
@@ -475,7 +461,7 @@ export default function CommandConsoleView() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }
 
 // ─── Command history item ──────────────────────────────────────────────────────
@@ -485,31 +471,29 @@ function CommandHistoryItem({
   disabled,
   onResend,
 }: {
-  command: CommandDTO
-  disabled: boolean
-  onResend: () => void
+  command: CommandDTO;
+  disabled: boolean;
+  onResend: () => void;
 }) {
   const payloadJson = React.useMemo(() => {
     try {
-      return JSON.stringify(command.payload, null, 2)
+      return JSON.stringify(command.payload, null, 2);
     } catch {
-      return '{}'
+      return '{}';
     }
-  }, [command.payload])
+  }, [command.payload]);
 
   const resultJson = React.useMemo(() => {
-    if (!command.result) return null
+    if (!command.result) return null;
     try {
-      return JSON.stringify(command.result, null, 2)
+      return JSON.stringify(command.result, null, 2);
     } catch {
-      return null
+      return null;
     }
-  }, [command.result])
+  }, [command.result]);
 
   const isTerminal =
-    command.status === 'COMPLETED' ||
-    command.status === 'FAILED' ||
-    command.status === 'TIMEOUT'
+    command.status === 'COMPLETED' || command.status === 'FAILED' || command.status === 'TIMEOUT';
 
   return (
     <li className="rounded-lg border border-border bg-surface p-3">
@@ -580,5 +564,5 @@ function CommandHistoryItem({
         </Button>
       </div>
     </li>
-  )
+  );
 }

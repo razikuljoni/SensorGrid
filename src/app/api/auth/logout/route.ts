@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { DEMO_ORG_ID, DEMO_USER_NAME } from '@/lib/api'
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { DEMO_ORG_ID, DEMO_USER_NAME } from '@/lib/api';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 // POST /api/auth/logout
 // In a real app this would destroy the server-side session + clear cookies.
@@ -18,13 +18,13 @@ export async function POST() {
         targetName: DEMO_USER_NAME,
         metadata: JSON.stringify({ source: 'web' }),
       },
-    })
+    });
   } catch {
     // non-critical
   }
 
-  const res = NextResponse.json({ success: true })
+  const res = NextResponse.json({ success: true });
   // Clear any session cookies (no-op in demo, but correct for production)
-  res.cookies.set('session', '', { httpOnly: true, maxAge: 0, path: '/' })
-  return res
+  res.cookies.set('session', '', { httpOnly: true, maxAge: 0, path: '/' });
+  return res;
 }

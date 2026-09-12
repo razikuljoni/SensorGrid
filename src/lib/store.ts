@@ -1,6 +1,6 @@
-'use client'
+'use client';
 
-import { create } from 'zustand'
+import { create } from 'zustand';
 
 export type ViewKey =
   | 'dashboard'
@@ -14,24 +14,24 @@ export type ViewKey =
   | 'notifications'
   | 'activity'
   | 'settings'
-  | 'about'
+  | 'about';
 
 interface AppState {
   // Navigation — single-page view switcher (user can only see /)
-  view: ViewKey
-  selectedDeviceId: string | null
-  selectedAutomationId: string | null
-  commandPaletteOpen: boolean
-  notificationsOpen: boolean
+  view: ViewKey;
+  selectedDeviceId: string | null;
+  selectedAutomationId: string | null;
+  commandPaletteOpen: boolean;
+  notificationsOpen: boolean;
   // Sidebar collapse (mobile)
-  sidebarOpen: boolean
+  sidebarOpen: boolean;
 
-  setView: (view: ViewKey) => void
-  openDevice: (deviceId: string) => void
-  openAutomation: (id: string | null) => void
-  setCommandPaletteOpen: (open: boolean) => void
-  setNotificationsOpen: (open: boolean) => void
-  setSidebarOpen: (open: boolean) => void
+  setView: (view: ViewKey) => void;
+  openDevice: (deviceId: string) => void;
+  openAutomation: (id: string | null) => void;
+  setCommandPaletteOpen: (open: boolean) => void;
+  setNotificationsOpen: (open: boolean) => void;
+  setSidebarOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -43,11 +43,15 @@ export const useAppStore = create<AppState>((set) => ({
   sidebarOpen: false,
 
   setView: (view) =>
-    set({ view, selectedDeviceId: view === 'device-detail' ? undefined : null, sidebarOpen: false }),
+    set({
+      view,
+      selectedDeviceId: view === 'device-detail' ? undefined : null,
+      sidebarOpen: false,
+    }),
   openDevice: (deviceId) =>
     set({ view: 'device-detail', selectedDeviceId: deviceId, sidebarOpen: false }),
   openAutomation: (id) => set({ selectedAutomationId: id }),
   setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
   setNotificationsOpen: (open) => set({ notificationsOpen: open }),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
-}))
+}));

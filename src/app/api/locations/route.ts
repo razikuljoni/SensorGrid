@@ -1,19 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { toLocationDTO, ok, DEMO_ORG_ID } from '@/lib/api'
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { toLocationDTO, ok, DEMO_ORG_ID } from '@/lib/api';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const locations = await db.location.findMany({
     where: { organizationId: DEMO_ORG_ID },
     orderBy: { name: 'asc' },
-  })
-  return NextResponse.json({ locations: locations.map(toLocationDTO) })
+  });
+  return NextResponse.json({ locations: locations.map(toLocationDTO) });
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({}))
+  const body = await req.json().catch(() => ({}));
   const loc = await db.location.create({
     data: {
       organizationId: DEMO_ORG_ID,
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       parentId: body.parentId ?? null,
       metadata: JSON.stringify(body.metadata ?? {}),
     },
-  })
+  });
   await db.auditLog.create({
     data: {
       organizationId: DEMO_ORG_ID,
@@ -32,6 +32,6 @@ export async function POST(req: NextRequest) {
       targetId: loc.id,
       targetName: loc.name,
     },
-  })
-  return ok(toLocationDTO(loc))
+  });
+  return ok(toLocationDTO(loc));
 }

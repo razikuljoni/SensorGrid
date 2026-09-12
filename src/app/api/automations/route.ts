@@ -1,20 +1,20 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { toAutomationDTO, ok, DEMO_ORG_ID } from '@/lib/api'
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { toAutomationDTO, ok, DEMO_ORG_ID } from '@/lib/api';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   const automations = await db.automation.findMany({
     where: { organizationId: DEMO_ORG_ID },
     orderBy: { createdAt: 'desc' },
     include: { executions: { orderBy: { startedAt: 'desc' }, take: 5 } },
-  })
-  return NextResponse.json({ automations: automations.map(toAutomationDTO) })
+  });
+  return NextResponse.json({ automations: automations.map(toAutomationDTO) });
 }
 
 export async function POST(req: NextRequest) {
-  const body = await req.json().catch(() => ({}))
+  const body = await req.json().catch(() => ({}));
   const automation = await db.automation.create({
     data: {
       organizationId: DEMO_ORG_ID,
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
       nodes: JSON.stringify(body.nodes ?? []),
       edges: JSON.stringify(body.edges ?? []),
     },
-  })
+  });
   await db.auditLog.create({
     data: {
       organizationId: DEMO_ORG_ID,
@@ -36,6 +36,6 @@ export async function POST(req: NextRequest) {
       targetId: automation.id,
       targetName: automation.name,
     },
-  })
-  return ok(toAutomationDTO(automation))
+  });
+  return ok(toAutomationDTO(automation));
 }

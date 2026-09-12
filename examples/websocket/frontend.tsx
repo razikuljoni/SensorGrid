@@ -10,7 +10,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 type User = {
   id: string;
   username: string;
-}
+};
 
 type Message = {
   id: string;
@@ -18,7 +18,7 @@ type Message = {
   content: string;
   timestamp: Date | string;
   type: 'user' | 'system';
-}
+};
 
 export default function SocketDemo() {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -39,8 +39,8 @@ export default function SocketDemo() {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
-      timeout: 10000
-    })
+      timeout: 10000,
+    });
 
     setSocket(socketInstance);
 
@@ -53,13 +53,13 @@ export default function SocketDemo() {
     });
 
     socketInstance.on('message', (msg: Message) => {
-      setMessages(prev => [...prev, msg]);
+      setMessages((prev) => [...prev, msg]);
     });
 
     socketInstance.on('user-joined', (data: { user: User; message: Message }) => {
-      setMessages(prev => [...prev, data.message]);
-      setUsers(prev => {
-        if (!prev.find(u => u.id === data.user.id)) {
+      setMessages((prev) => [...prev, data.message]);
+      setUsers((prev) => {
+        if (!prev.find((u) => u.id === data.user.id)) {
           return [...prev, data.user];
         }
         return prev;
@@ -67,8 +67,8 @@ export default function SocketDemo() {
     });
 
     socketInstance.on('user-left', (data: { user: User; message: Message }) => {
-      setMessages(prev => [...prev, data.message]);
-      setUsers(prev => prev.filter(u => u.id !== data.user.id));
+      setMessages((prev) => [...prev, data.message]);
+      setUsers((prev) => prev.filter((u) => u.id !== data.user.id));
     });
 
     socketInstance.on('users-list', (data: { users: User[] }) => {
@@ -91,7 +91,7 @@ export default function SocketDemo() {
     if (socket && inputMessage.trim() && username.trim()) {
       socket.emit('message', {
         content: inputMessage.trim(),
-        username: username.trim()
+        username: username.trim(),
       });
       setInputMessage('');
     }
@@ -109,7 +109,9 @@ export default function SocketDemo() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             WebSocket Demo
-            <span className={`text-sm px-2 py-1 rounded ${isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            <span
+              className={`text-sm px-2 py-1 rounded ${isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+            >
               {isConnected ? 'Connected' : 'Disconnected'}
             </span>
           </CardTitle>
@@ -148,16 +150,18 @@ export default function SocketDemo() {
                       <div key={msg.id} className="border-b pb-2 last:border-b-0">
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
-                            <p className={`text-sm font-medium ${msg.type === 'system'
-                                ? 'text-blue-600 italic'
-                                : 'text-gray-700'
-                              }`}>
+                            <p
+                              className={`text-sm font-medium ${
+                                msg.type === 'system' ? 'text-blue-600 italic' : 'text-gray-700'
+                              }`}
+                            >
                               {msg.username}
                             </p>
-                            <p className={`${msg.type === 'system'
-                                ? 'text-blue-500 italic'
-                                : 'text-gray-900'
-                              }`}>
+                            <p
+                              className={`${
+                                msg.type === 'system' ? 'text-blue-500 italic' : 'text-gray-900'
+                              }`}
+                            >
                               {msg.content}
                             </p>
                           </div>
@@ -180,10 +184,7 @@ export default function SocketDemo() {
                   disabled={!isConnected}
                   className="flex-1"
                 />
-                <Button
-                  onClick={sendMessage}
-                  disabled={!isConnected || !inputMessage.trim()}
-                >
+                <Button onClick={sendMessage} disabled={!isConnected || !inputMessage.trim()}>
                   Send
                 </Button>
               </div>

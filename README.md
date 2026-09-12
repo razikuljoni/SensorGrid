@@ -68,20 +68,20 @@ The product must answer these questions instantly:
 
 All screenshot images live in [`public/screenshots/`](public/screenshots/). The following views are available in the running application:
 
-| View | Description |
-|------|-------------|
-| **Dashboard** | Hero KPIs (online/offline/critical devices, active alerts, automations today, telemetry points), AtmospherePanel with live temperature/humidity/pressure/CO₂/light, device grid with DeviceOrbs, SignalTimeline activity feed, recent alerts |
-| **Devices** | Searchable, filterable device list with status badges, battery/signal indicators, location, tags |
-| **Device Detail** | Tabbed view: Overview (KPIs + latest telemetry), Telemetry (charts with time ranges), Controls (twin-derived switches/sliders + command sender), Twin (desired vs reported JSON + differences), History (audit + commands) |
-| **Telemetry** | Cross-device telemetry explorer with sensor selection, time range filters, live chart, latest-value tiles |
-| **Analytics** | Aggregated metrics: summary KPIs, hourly telemetry volume bar chart, per-device volume, alerts by severity pie chart, multi-series trend |
-| **Automations** | React Flow visual rule builder with trigger/condition/logic/delay/action/notification nodes, automation list with enable/disable, inspector panel for node config |
-| **Alerts** | Alert rules + alert events with full lifecycle (TRIGGERED → ACKNOWLEDGED → RESOLVED), severity badges, acknowledge/resolve actions |
-| **Command Console** | Developer-focused JSON command editor with payload presets, templates, live validation, command history with status transitions, resend |
-| **Notifications** | In-app notifications across categories (Device, Alert, Automation, System, Security) with read/unread state |
-| **Activity Log** | Unified audit trail with filters by action type and free-text search |
-| **Settings** | Organization info, members with RBAC roles, integrations status |
-| **About** | Product overview, feature list, technology stack |
+| View                | Description                                                                                                                                                                                                                                  |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dashboard**       | Hero KPIs (online/offline/critical devices, active alerts, automations today, telemetry points), AtmospherePanel with live temperature/humidity/pressure/CO₂/light, device grid with DeviceOrbs, SignalTimeline activity feed, recent alerts |
+| **Devices**         | Searchable, filterable device list with status badges, battery/signal indicators, location, tags                                                                                                                                             |
+| **Device Detail**   | Tabbed view: Overview (KPIs + latest telemetry), Telemetry (charts with time ranges), Controls (twin-derived switches/sliders + command sender), Twin (desired vs reported JSON + differences), History (audit + commands)                   |
+| **Telemetry**       | Cross-device telemetry explorer with sensor selection, time range filters, live chart, latest-value tiles                                                                                                                                    |
+| **Analytics**       | Aggregated metrics: summary KPIs, hourly telemetry volume bar chart, per-device volume, alerts by severity pie chart, multi-series trend                                                                                                     |
+| **Automations**     | React Flow visual rule builder with trigger/condition/logic/delay/action/notification nodes, automation list with enable/disable, inspector panel for node config                                                                            |
+| **Alerts**          | Alert rules + alert events with full lifecycle (TRIGGERED → ACKNOWLEDGED → RESOLVED), severity badges, acknowledge/resolve actions                                                                                                           |
+| **Command Console** | Developer-focused JSON command editor with payload presets, templates, live validation, command history with status transitions, resend                                                                                                      |
+| **Notifications**   | In-app notifications across categories (Device, Alert, Automation, System, Security) with read/unread state                                                                                                                                  |
+| **Activity Log**    | Unified audit trail with filters by action type and free-text search                                                                                                                                                                         |
+| **Settings**        | Organization info, members with RBAC roles, integrations status                                                                                                                                                                              |
+| **About**           | Product overview, feature list, technology stack                                                                                                                                                                                             |
 
 ---
 
@@ -91,12 +91,12 @@ SensorGrid is built **mobile-first** and is fully fluid responsive across all br
 
 ### Breakpoints
 
-| Breakpoint | Width | Layout Behavior |
-|------------|-------|-----------------|
-| Mobile | 320–639px | Single column, sidebar hidden (hamburger menu), KPI cards 2/row, device cards 1/col |
-| Tablet (sm) | 640–1023px | 2-column grids, sidebar still hamburger, KPI cards 2–3/row |
-| Desktop (lg) | 1024–1279px | Sidebar visible (fixed), 3-column device grid, KPI cards 3–5/row |
-| Wide (xl) | 1280px+ | Full 4-column device grid, 5-column KPI row |
+| Breakpoint   | Width       | Layout Behavior                                                                     |
+| ------------ | ----------- | ----------------------------------------------------------------------------------- |
+| Mobile       | 320–639px   | Single column, sidebar hidden (hamburger menu), KPI cards 2/row, device cards 1/col |
+| Tablet (sm)  | 640–1023px  | 2-column grids, sidebar still hamburger, KPI cards 2–3/row                          |
+| Desktop (lg) | 1024–1279px | Sidebar visible (fixed), 3-column device grid, KPI cards 3–5/row                    |
+| Wide (xl)    | 1280px+     | Full 4-column device grid, 5-column KPI row                                         |
 
 ### Responsive Features
 
@@ -200,31 +200,31 @@ Aether Grid is the complete visual language of SensorGrid.
 
 Semantic tokens only — no hardcoded colors throughout components.
 
-| Token | Light | Dark | Usage |
-|-------|-------|------|-------|
-| `--primary` | Deep indigo | Brighter indigo | Brand, primary actions |
-| `--accent` | Electric cyan tint | Electric cyan glow | Live indicators, highlights |
-| `--success` | Teal-green | Brighter green | Online, healthy, completed |
-| `--warning` | Amber | Brighter amber | Warnings, degraded |
-| `--danger` | Warm red | Brighter red | Critical, errors, alerts |
-| `--info` | Blue-violet | Brighter blue-violet | Informational |
-| `--background` | Near-white cool tint | Deep indigo-black | Canvas |
-| `--surface` | Slightly off-white | Elevated dark | Cards, panels |
+| Token          | Light                | Dark                 | Usage                       |
+| -------------- | -------------------- | -------------------- | --------------------------- |
+| `--primary`    | Deep indigo          | Brighter indigo      | Brand, primary actions      |
+| `--accent`     | Electric cyan tint   | Electric cyan glow   | Live indicators, highlights |
+| `--success`    | Teal-green           | Brighter green       | Online, healthy, completed  |
+| `--warning`    | Amber                | Brighter amber       | Warnings, degraded          |
+| `--danger`     | Warm red             | Brighter red         | Critical, errors, alerts    |
+| `--info`       | Blue-violet          | Brighter blue-violet | Informational               |
+| `--background` | Near-white cool tint | Deep indigo-black    | Canvas                      |
+| `--surface`    | Slightly off-white   | Elevated dark        | Cards, panels               |
 
 Full light + dark themes with `next-themes`.
 
 ### Signature Components
 
-| Component | Location | Purpose |
-|-----------|----------|---------|
-| **PulseCard** | `src/components/aether/pulse-card.tsx` | KPI + telemetry card with icon, value, unit, trend, sparkline |
-| **DeviceOrb** | `src/components/aether/device-orb.tsx` | Circular device health viz: connectivity, battery ring, signal, activity pulse |
-| **TelemetryTile** | `src/components/aether/telemetry-tile.tsx` | Compact live sensor display with quality indicator + flicker on update |
-| **SignalTimeline** | `src/components/aether/signal-timeline.tsx` | Vertical event timeline with action-specific icons |
-| **AtmospherePanel** | `src/components/aether/atmosphere-panel.tsx` | Large environmental panel with ambient glow that shifts with values |
-| **StatusBadge** | `src/components/aether/status-badge.tsx` | Device/alert/command status pills with icon + label + dot |
-| **Sparkline** | `src/components/charts/sparkline.tsx` | Lightweight SVG sparkline for PulseCard |
-| **TelemetryChart** | `src/components/charts/telemetry-chart.tsx` | Multi-series area/line chart with downsampling |
+| Component           | Location                                     | Purpose                                                                        |
+| ------------------- | -------------------------------------------- | ------------------------------------------------------------------------------ |
+| **PulseCard**       | `src/components/aether/pulse-card.tsx`       | KPI + telemetry card with icon, value, unit, trend, sparkline                  |
+| **DeviceOrb**       | `src/components/aether/device-orb.tsx`       | Circular device health viz: connectivity, battery ring, signal, activity pulse |
+| **TelemetryTile**   | `src/components/aether/telemetry-tile.tsx`   | Compact live sensor display with quality indicator + flicker on update         |
+| **SignalTimeline**  | `src/components/aether/signal-timeline.tsx`  | Vertical event timeline with action-specific icons                             |
+| **AtmospherePanel** | `src/components/aether/atmosphere-panel.tsx` | Large environmental panel with ambient glow that shifts with values            |
+| **StatusBadge**     | `src/components/aether/status-badge.tsx`     | Device/alert/command status pills with icon + label + dot                      |
+| **Sparkline**       | `src/components/charts/sparkline.tsx`        | Lightweight SVG sparkline for PulseCard                                        |
+| **TelemetryChart**  | `src/components/charts/telemetry-chart.tsx`  | Multi-series area/line chart with downsampling                                 |
 
 ### Status Language
 
@@ -319,15 +319,15 @@ Open `http://localhost:3000` (or use the Preview Panel in the sandbox).
 
 ### Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `pnpm run dev` | Start Next.js dev server on port 3000 |
-| `pnpm run lint` | Run ESLint |
-| `pnpm run db:push` | Push Prisma schema to SQLite |
-| `pnpm run db:generate` | Regenerate Prisma Client |
-| `pnpm run seed` | Seed demo data |
-| `pnpm run build` | Production build (standalone output) |
-| `pnpm run start` | Start production server (port 3000) |
+| Script                 | Description                           |
+| ---------------------- | ------------------------------------- |
+| `pnpm run dev`         | Start Next.js dev server on port 3000 |
+| `pnpm run lint`        | Run ESLint                            |
+| `pnpm run db:push`     | Push Prisma schema to SQLite          |
+| `pnpm run db:generate` | Regenerate Prisma Client              |
+| `pnpm run seed`        | Seed demo data                        |
+| `pnpm run build`       | Production build (standalone output)  |
+| `pnpm run start`       | Start production server (port 3000)   |
 
 ### Quick Restart
 
@@ -367,7 +367,7 @@ services:
   web:
     build: .
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - DATABASE_URL=file:/data/db/custom.db
       - NODE_ENV=production
@@ -554,11 +554,11 @@ This sandbox deployment uses a **demo authentication model** — there is a sing
 
 ### API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/auth` | Get current user + organization context |
-| POST | `/api/auth` | Demo login (always returns the demo user) |
-| POST | `/api/auth/logout` | Logout — records audit entry, clears session cookie |
+| Method | Endpoint           | Description                                         |
+| ------ | ------------------ | --------------------------------------------------- |
+| GET    | `/api/auth`        | Get current user + organization context             |
+| POST   | `/api/auth`        | Demo login (always returns the demo user)           |
+| POST   | `/api/auth/logout` | Logout — records audit entry, clears session cookie |
 
 ### Logout Flow
 
@@ -614,11 +614,13 @@ npx playwright test
 The production CI/CD pipeline uses GitHub Actions:
 
 **Pull Request pipeline:**
+
 ```
 Install → Lint → Typecheck → Unit Tests → Integration Tests → Build
 ```
 
 **Main branch pipeline:**
+
 ```
 Tests → Docker Build → Image Publish → Deployment
 ```
@@ -640,6 +642,7 @@ Every API request includes a `requestId`. Logs include `requestId`, `userId`, `o
 ### Metrics
 
 The realtime service tracks (visible in the dashboard):
+
 - `mqtt_messages_total` (simulated as telemetry points)
 - `telemetry_ingested_total`
 - `automation_execution_total`
@@ -741,38 +744,38 @@ sensor-grid/
 
 All API routes are under `/api`. The base URL in production would be `/api/v1`.
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/dashboard` | Aggregated stats + environment + recent activity + devices |
-| GET | `/api/devices` | List devices (filter by `status`, `locationId`, `q`) |
-| GET | `/api/devices/[id]` | Get single device with sensors + twin |
-| PATCH | `/api/devices/[id]` | Update device name/notes/tags/status |
-| DELETE | `/api/devices/[id]` | Delete device |
-| GET | `/api/devices/[id]/telemetry` | Time-series (params: `sensorKey`, `range`) |
-| GET | `/api/devices/[id]/commands` | Command history |
-| POST | `/api/devices/[id]/commands` | Send command (body: `{ payload }`) |
-| GET | `/api/devices/[id]/twin` | Get digital twin |
-| PATCH | `/api/devices/[id]/twin` | Update desired state |
-| GET | `/api/devices/[id]/history` | Combined audit + command timeline |
-| GET | `/api/automations` | List automations |
-| POST | `/api/automations` | Create automation |
-| GET | `/api/automations/[id]` | Get automation with executions |
-| PATCH | `/api/automations/[id]` | Update automation (nodes/edges/enabled) |
-| DELETE | `/api/automations/[id]` | Delete automation |
-| POST | `/api/automations/[id]/execute` | Manual trigger |
-| GET | `/api/alerts` | Alert events + rules (filter by `status`, `severity`) |
-| POST | `/api/alerts` | Create alert rule |
-| PATCH | `/api/alerts/[id]/acknowledge` | Acknowledge alert |
-| PATCH | `/api/alerts/[id]/resolve` | Resolve alert |
-| GET | `/api/notifications` | List notifications (filter: `unread`) |
-| PATCH | `/api/notifications` | Mark all read |
-| PATCH | `/api/notifications/[id]/read` | Mark single read |
-| GET | `/api/audit` | Audit log (filter: `action`, `targetType`, `limit`) |
-| GET | `/api/analytics` | Aggregated metrics (param: `range`) |
-| GET | `/api/org` | Organization + members + stats |
-| GET | `/api/locations` | List locations |
-| POST | `/api/locations` | Create location |
-| GET | `/api/auth` | Demo auth (GET me / POST login) |
+| Method | Endpoint                        | Description                                                |
+| ------ | ------------------------------- | ---------------------------------------------------------- |
+| GET    | `/api/dashboard`                | Aggregated stats + environment + recent activity + devices |
+| GET    | `/api/devices`                  | List devices (filter by `status`, `locationId`, `q`)       |
+| GET    | `/api/devices/[id]`             | Get single device with sensors + twin                      |
+| PATCH  | `/api/devices/[id]`             | Update device name/notes/tags/status                       |
+| DELETE | `/api/devices/[id]`             | Delete device                                              |
+| GET    | `/api/devices/[id]/telemetry`   | Time-series (params: `sensorKey`, `range`)                 |
+| GET    | `/api/devices/[id]/commands`    | Command history                                            |
+| POST   | `/api/devices/[id]/commands`    | Send command (body: `{ payload }`)                         |
+| GET    | `/api/devices/[id]/twin`        | Get digital twin                                           |
+| PATCH  | `/api/devices/[id]/twin`        | Update desired state                                       |
+| GET    | `/api/devices/[id]/history`     | Combined audit + command timeline                          |
+| GET    | `/api/automations`              | List automations                                           |
+| POST   | `/api/automations`              | Create automation                                          |
+| GET    | `/api/automations/[id]`         | Get automation with executions                             |
+| PATCH  | `/api/automations/[id]`         | Update automation (nodes/edges/enabled)                    |
+| DELETE | `/api/automations/[id]`         | Delete automation                                          |
+| POST   | `/api/automations/[id]/execute` | Manual trigger                                             |
+| GET    | `/api/alerts`                   | Alert events + rules (filter by `status`, `severity`)      |
+| POST   | `/api/alerts`                   | Create alert rule                                          |
+| PATCH  | `/api/alerts/[id]/acknowledge`  | Acknowledge alert                                          |
+| PATCH  | `/api/alerts/[id]/resolve`      | Resolve alert                                              |
+| GET    | `/api/notifications`            | List notifications (filter: `unread`)                      |
+| PATCH  | `/api/notifications`            | Mark all read                                              |
+| PATCH  | `/api/notifications/[id]/read`  | Mark single read                                           |
+| GET    | `/api/audit`                    | Audit log (filter: `action`, `targetType`, `limit`)        |
+| GET    | `/api/analytics`                | Aggregated metrics (param: `range`)                        |
+| GET    | `/api/org`                      | Organization + members + stats                             |
+| GET    | `/api/locations`                | List locations                                             |
+| POST   | `/api/locations`                | Create location                                            |
+| GET    | `/api/auth`                     | Demo auth (GET me / POST login)                            |
 
 ---
 
@@ -784,10 +787,26 @@ The realtime service emits events on the `event` channel. Clients connect via `i
 
 ```typescript
 type ServerSocketEvent =
-  | { type: 'device.telemetry'; deviceId: string; sensorKey: string; value: number; unit: string; quality: TelemetryQuality; timestamp: string }
+  | {
+      type: 'device.telemetry';
+      deviceId: string;
+      sensorKey: string;
+      value: number;
+      unit: string;
+      quality: TelemetryQuality;
+      timestamp: string;
+    }
   | { type: 'device.online'; deviceId: string; deviceName: string; timestamp: string }
   | { type: 'device.offline'; deviceId: string; deviceName: string; timestamp: string }
-  | { type: 'device.state'; deviceId: string; status: DeviceStatus; health: DeviceHealth; battery: number | null; signal: number | null; lastSeen: string }
+  | {
+      type: 'device.state';
+      deviceId: string;
+      status: DeviceStatus;
+      health: DeviceHealth;
+      battery: number | null;
+      signal: number | null;
+      lastSeen: string;
+    }
   | { type: 'command.created'; command: CommandDTO }
   | { type: 'command.updated'; command: CommandDTO }
   | { type: 'automation.started'; execution: AutomationExecutionDTO }
@@ -796,7 +815,7 @@ type ServerSocketEvent =
   | { type: 'alert.acknowledged'; alert: AlertEventDTO }
   | { type: 'alert.resolved'; alert: AlertEventDTO }
   | { type: 'notification.created'; notification: NotificationDTO }
-  | { type: 'activity'; log: AuditLogDTO }
+  | { type: 'activity'; log: AuditLogDTO };
 ```
 
 ### Client → Server Events
@@ -804,7 +823,7 @@ type ServerSocketEvent =
 ```typescript
 type ClientSocketEvent =
   | { type: 'subscribe'; organizationId: string }
-  | { type: 'command.send'; deviceId: string; payload: Record<string, unknown> }
+  | { type: 'command.send'; deviceId: string; payload: Record<string, unknown> };
 ```
 
 ---
@@ -850,19 +869,19 @@ type ClientSocketEvent =
 
 This sandbox deployment has the following limitations compared to the full production architecture:
 
-| Aspect | Sandbox | Production Target |
-|--------|---------|-------------------|
-| Database | SQLite (single file) | PostgreSQL + TimescaleDB |
-| Caching | In-memory | Redis |
-| Message queue | In-process (setInterval) | BullMQ + Redis Streams |
-| MQTT broker | Simulated by realtime-service | Mosquitto (real broker) |
-| Backend | Next.js API Routes | NestJS (modular monolith) |
-| Deployment | Single Next.js app | Docker Compose (web, api, worker, mqtt, postgres, redis, prometheus, grafana) |
-| Auth | Demo (always "SensorGrid Operator") | NextAuth.js v4 with sessions |
-| Object storage | Local filesystem | S3-compatible |
-| Email | Not configured | SMTP |
-| Observability | Console logs | Sentry + OpenTelemetry + Prometheus + Grafana |
-| Testing | Manual browser verification | Vitest + Jest + RTL + Supertest + Playwright |
+| Aspect         | Sandbox                             | Production Target                                                             |
+| -------------- | ----------------------------------- | ----------------------------------------------------------------------------- |
+| Database       | SQLite (single file)                | PostgreSQL + TimescaleDB                                                      |
+| Caching        | In-memory                           | Redis                                                                         |
+| Message queue  | In-process (setInterval)            | BullMQ + Redis Streams                                                        |
+| MQTT broker    | Simulated by realtime-service       | Mosquitto (real broker)                                                       |
+| Backend        | Next.js API Routes                  | NestJS (modular monolith)                                                     |
+| Deployment     | Single Next.js app                  | Docker Compose (web, api, worker, mqtt, postgres, redis, prometheus, grafana) |
+| Auth           | Demo (always "SensorGrid Operator") | NextAuth.js v4 with sessions                                                  |
+| Object storage | Local filesystem                    | S3-compatible                                                                 |
+| Email          | Not configured                      | SMTP                                                                          |
+| Observability  | Console logs                        | Sentry + OpenTelemetry + Prometheus + Grafana                                 |
+| Testing        | Manual browser verification         | Vitest + Jest + RTL + Supertest + Playwright                                  |
 
 The data model, API surface, design system, and realtime protocol are production-shaped so the same code can be lifted onto the intended infrastructure with minimal changes.
 
@@ -874,4 +893,4 @@ MIT — Built as a portfolio-grade demonstration of modern full-stack IoT engine
 
 ---
 
-> **SensorGrid** — *Connect devices. Observe everything. Automate intelligently.*
+> **SensorGrid** — _Connect devices. Observe everything. Automate intelligently._

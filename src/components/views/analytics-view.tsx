@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SensorGrid — Analytics View (Task 12)
@@ -7,8 +7,8 @@
 // Driven by useAnalytics(range) + useRealtimeNotifications().
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as React from 'react'
-import { motion } from 'framer-motion'
+import * as React from 'react';
+import { motion } from 'framer-motion';
 import {
   Activity,
   AlertTriangle,
@@ -19,7 +19,7 @@ import {
   Send,
   Sparkles,
   Zap,
-} from 'lucide-react'
+} from 'lucide-react';
 import {
   Bar,
   BarChart,
@@ -31,17 +31,17 @@ import {
   Tooltip,
   XAxis,
   YAxis,
-} from 'recharts'
+} from 'recharts';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
-import { TelemetryChart } from '@/components/charts/telemetry-chart'
+import { TelemetryChart } from '@/components/charts/telemetry-chart';
 
-import { useAnalytics, useRealtimeNotifications } from '@/lib/hooks'
-import { ALERT_SEVERITY_META } from '@/lib/status'
-import { cn } from '@/lib/utils'
+import { useAnalytics, useRealtimeNotifications } from '@/lib/hooks';
+import { ALERT_SEVERITY_META } from '@/lib/status';
+import { cn } from '@/lib/utils';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
@@ -51,18 +51,18 @@ const RANGES: { value: string; label: string }[] = [
   { value: '24h', label: '24h' },
   { value: '7d', label: '7d' },
   { value: '30d', label: '30d' },
-]
+];
 
 const SEVERITY_COLOR_VAR: Record<string, string> = {
   INFO: 'var(--info)',
   WARNING: 'var(--warning)',
   CRITICAL: 'var(--danger)',
-}
+};
 
 // ─── Tooltip ─────────────────────────────────────────────────────────────────
 
 function ChartTooltip({ active, payload, label }: any) {
-  if (!active || !payload?.length) return null
+  if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-border bg-popover px-3 py-2 text-xs shadow-md">
       {label !== undefined && label !== '' && (
@@ -83,7 +83,7 @@ function ChartTooltip({ active, payload, label }: any) {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
 // ─── Empty state ─────────────────────────────────────────────────────────────
@@ -94,16 +94,16 @@ function EmptyChart({ label, icon: Icon = Activity }: { label: string; icon?: ty
       <Icon className="size-6 text-text-muted/50" />
       <p className="text-xs text-text-muted max-w-[240px]">{label}</p>
     </div>
-  )
+  );
 }
 
 // ─── KPI card ────────────────────────────────────────────────────────────────
 
 interface KpiDef {
-  key: string
-  label: string
-  icon: typeof Cpu
-  accent: string // tailwind text color
+  key: string;
+  label: string;
+  icon: typeof Cpu;
+  accent: string; // tailwind text color
 }
 
 const KPIS: KpiDef[] = [
@@ -113,10 +113,18 @@ const KPIS: KpiDef[] = [
   { key: 'alerts', label: 'Alerts', icon: AlertTriangle, accent: 'text-warning' },
   { key: 'automationExecutions', label: 'Automation Runs', icon: Zap, accent: 'text-primary' },
   { key: 'commands', label: 'Commands', icon: Send, accent: 'text-info' },
-]
+];
 
-function KpiCard({ kpi, value, loading }: { kpi: KpiDef; value: number | undefined; loading: boolean }) {
-  const Icon = kpi.icon
+function KpiCard({
+  kpi,
+  value,
+  loading,
+}: {
+  kpi: KpiDef;
+  value: number | undefined;
+  loading: boolean;
+}) {
+  const Icon = kpi.icon;
   return (
     <Card className="p-4 gap-2">
       <div className="flex items-center justify-between">
@@ -127,32 +135,32 @@ function KpiCard({ kpi, value, loading }: { kpi: KpiDef; value: number | undefin
         {loading ? <Skeleton className="h-7 w-16" /> : (value ?? 0).toLocaleString()}
       </div>
     </Card>
-  )
+  );
 }
 
 // ─── View ────────────────────────────────────────────────────────────────────
 
 export default function AnalyticsView() {
-  useRealtimeNotifications()
+  useRealtimeNotifications();
 
-  const [range, setRange] = React.useState<string>('24h')
-  const { data, isLoading, isError, error } = useAnalytics(range)
+  const [range, setRange] = React.useState<string>('24h');
+  const { data, isLoading, isError, error } = useAnalytics(range);
 
-  const summary = data?.summary
-  const series = data?.series ?? []
-  const hourlyVolume = data?.hourlyVolume ?? []
-  const deviceVolume = data?.deviceVolume ?? []
-  const alertsBySeverity = data?.alertsBySeverity ?? []
+  const summary = data?.summary;
+  const series = data?.series ?? [];
+  const hourlyVolume = data?.hourlyVolume ?? [];
+  const deviceVolume = data?.deviceVolume ?? [];
+  const alertsBySeverity = data?.alertsBySeverity ?? [];
 
   // Animation stagger variants.
   const container = {
     hidden: { opacity: 0 },
     show: { opacity: 1, transition: { staggerChildren: 0.04 } },
-  }
+  };
   const item = {
     hidden: { opacity: 0, y: 6 },
     show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
-  }
+  };
 
   return (
     <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
@@ -246,7 +254,11 @@ export default function AnalyticsView() {
             ) : (
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={hourlyVolume} margin={{ top: 8, right: 16, bottom: 0, left: -16 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="var(--border-subtle)" vertical={false} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="var(--border-subtle)"
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="hour"
                     stroke="var(--text-muted)"
@@ -383,9 +395,9 @@ export default function AnalyticsView() {
                 </ResponsiveContainer>
                 <div className="space-y-2">
                   {alertsBySeverity.map((a) => {
-                    const sev = a.severity as keyof typeof ALERT_SEVERITY_META
-                    const meta = ALERT_SEVERITY_META[sev] ?? ALERT_SEVERITY_META.INFO
-                    const Icon = meta.icon
+                    const sev = a.severity as keyof typeof ALERT_SEVERITY_META;
+                    const meta = ALERT_SEVERITY_META[sev] ?? ALERT_SEVERITY_META.INFO;
+                    const Icon = meta.icon;
                     return (
                       <div
                         key={a.severity as string}
@@ -399,7 +411,7 @@ export default function AnalyticsView() {
                           {a.count.toLocaleString()}
                         </span>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -430,5 +442,5 @@ export default function AnalyticsView() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

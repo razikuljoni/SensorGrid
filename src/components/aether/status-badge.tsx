@@ -1,25 +1,20 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { cn } from '@/lib/utils'
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 import {
   DEVICE_STATUS_META,
   ALERT_SEVERITY_META,
   ALERT_STATUS_META,
   COMMAND_STATUS_META,
-} from '@/lib/status'
-import type {
-  AlertSeverity,
-  AlertStatus,
-  CommandStatus,
-  DeviceStatus,
-} from '@/lib/types'
+} from '@/lib/status';
+import type { AlertSeverity, AlertStatus, CommandStatus, DeviceStatus } from '@/lib/types';
 
 // ─── StatusBadge family ─────────────────────────────────────────────────────
 // Compact status pill with icon + label. Never relies on color alone.
 
 function renderBadge(meta: any, size: 'sm' | 'md', className?: string) {
-  const Icon = meta.icon
+  const Icon = meta.icon;
   return (
     <span
       className={cn(
@@ -35,7 +30,7 @@ function renderBadge(meta: any, size: 'sm' | 'md', className?: string) {
       {Icon && <Icon className={cn(size === 'sm' ? 'size-2.5' : 'size-3')} />}
       <span>{meta.label}</span>
     </span>
-  )
+  );
 }
 
 export function DeviceStatusBadge({
@@ -43,12 +38,12 @@ export function DeviceStatusBadge({
   size = 'md',
   className,
 }: {
-  status: DeviceStatus
-  size?: 'sm' | 'md'
-  className?: string
+  status: DeviceStatus;
+  size?: 'sm' | 'md';
+  className?: string;
 }) {
-  const meta = DEVICE_STATUS_META[status] ?? DEVICE_STATUS_META.UNKNOWN
-  return renderBadge(meta, size, className)
+  const meta = DEVICE_STATUS_META[status] ?? DEVICE_STATUS_META.UNKNOWN;
+  return renderBadge(meta, size, className);
 }
 
 export function AlertSeverityBadge({
@@ -56,12 +51,12 @@ export function AlertSeverityBadge({
   size = 'md',
   className,
 }: {
-  severity: AlertSeverity
-  size?: 'sm' | 'md'
-  className?: string
+  severity: AlertSeverity;
+  size?: 'sm' | 'md';
+  className?: string;
 }) {
-  const meta = ALERT_SEVERITY_META[severity] ?? ALERT_SEVERITY_META.WARNING
-  return renderBadge(meta, size, className)
+  const meta = ALERT_SEVERITY_META[severity] ?? ALERT_SEVERITY_META.WARNING;
+  return renderBadge(meta, size, className);
 }
 
 export function AlertStatusBadge({
@@ -69,12 +64,12 @@ export function AlertStatusBadge({
   size = 'md',
   className,
 }: {
-  status: AlertStatus
-  size?: 'sm' | 'md'
-  className?: string
+  status: AlertStatus;
+  size?: 'sm' | 'md';
+  className?: string;
 }) {
-  const meta = ALERT_STATUS_META[status] ?? ALERT_STATUS_META.TRIGGERED
-  return renderBadge(meta, size, className)
+  const meta = ALERT_STATUS_META[status] ?? ALERT_STATUS_META.TRIGGERED;
+  return renderBadge(meta, size, className);
 }
 
 export function CommandStatusBadge({
@@ -82,10 +77,10 @@ export function CommandStatusBadge({
   size = 'md',
   className,
 }: {
-  status: CommandStatus
-  size?: 'sm' | 'md'
-  className?: string
+  status: CommandStatus;
+  size?: 'sm' | 'md';
+  className?: string;
 }) {
-  const meta = COMMAND_STATUS_META[status] ?? COMMAND_STATUS_META.PENDING
-  return renderBadge(meta, size, className)
+  const meta = COMMAND_STATUS_META[status] ?? COMMAND_STATUS_META.PENDING;
+  return renderBadge(meta, size, className);
 }

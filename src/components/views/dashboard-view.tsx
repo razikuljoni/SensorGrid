@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SensorGrid — Dashboard View (Task 7)
@@ -6,10 +6,10 @@
 // and recent alerts. Driven by useDashboard() + useRealtimeNotifications().
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as React from 'react'
-import { motion } from 'framer-motion'
-import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import * as React from 'react';
+import { motion } from 'framer-motion';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Activity,
   AlertTriangle,
@@ -19,31 +19,31 @@ import {
   MapPin,
   ShieldAlert,
   Zap,
-} from 'lucide-react'
+} from 'lucide-react';
 
-import { useDashboard, useRealtimeNotifications, qk } from '@/lib/hooks'
-import { useAppStore } from '@/lib/store'
-import { ALERT_SEVERITY_META, formatNumber, sensorMeta, timeAgo } from '@/lib/status'
+import { useDashboard, useRealtimeNotifications, qk } from '@/lib/hooks';
+import { useAppStore } from '@/lib/store';
+import { ALERT_SEVERITY_META, formatNumber, sensorMeta, timeAgo } from '@/lib/status';
 import type {
   AlertEventDTO,
   AlertSeverity,
   AuditLogDTO,
   DeviceDTO,
   EnvironmentSnapshotDTO,
-} from '@/lib/types'
-import { cn } from '@/lib/utils'
+} from '@/lib/types';
+import { cn } from '@/lib/utils';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-import { PulseCard } from '@/components/aether/pulse-card'
-import { AtmospherePanel } from '@/components/aether/atmosphere-panel'
-import { DeviceOrb } from '@/components/aether/device-orb'
-import { TelemetryTile } from '@/components/aether/telemetry-tile'
-import { SignalTimeline } from '@/components/aether/signal-timeline'
-import { DeviceStatusBadge } from '@/components/aether/status-badge'
+import { PulseCard } from '@/components/aether/pulse-card';
+import { AtmospherePanel } from '@/components/aether/atmosphere-panel';
+import { DeviceOrb } from '@/components/aether/device-orb';
+import { TelemetryTile } from '@/components/aether/telemetry-tile';
+import { SignalTimeline } from '@/components/aether/signal-timeline';
+import { DeviceStatusBadge } from '@/components/aether/status-badge';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -57,48 +57,48 @@ const TELEMETRY_PRIORITY = [
   'current',
   'power',
   'motion',
-] as const
+] as const;
 
 interface TwinReading {
-  key: string
-  value: number
-  unit?: string
-  label?: string
+  key: string;
+  value: number;
+  unit?: string;
+  label?: string;
 }
 
 function extractTwinReadings(device: DeviceDTO, max = 3): TwinReading[] {
-  const reported = device.twin?.reported
-  if (!reported || typeof reported !== 'object') return []
-  const out: TwinReading[] = []
-  const seen = new Set<string>()
+  const reported = device.twin?.reported;
+  if (!reported || typeof reported !== 'object') return [];
+  const out: TwinReading[] = [];
+  const seen = new Set<string>();
   // Walk priority list first, then any extra numeric keys.
   for (const key of TELEMETRY_PRIORITY) {
-    const raw = (reported as Record<string, unknown>)[key]
+    const raw = (reported as Record<string, unknown>)[key];
     if (typeof raw === 'number' && !Number.isNaN(raw)) {
-      out.push({ key, value: raw, unit: sensorMeta(key).unit, label: sensorMeta(key).label })
-      seen.add(key)
-      if (out.length >= max) return out
+      out.push({ key, value: raw, unit: sensorMeta(key).unit, label: sensorMeta(key).label });
+      seen.add(key);
+      if (out.length >= max) return out;
     }
   }
   for (const [key, raw] of Object.entries(reported as Record<string, unknown>)) {
-    if (seen.has(key)) continue
+    if (seen.has(key)) continue;
     if (typeof raw === 'number' && !Number.isNaN(raw)) {
-      out.push({ key, value: raw, unit: sensorMeta(key).unit, label: sensorMeta(key).label })
-      if (out.length >= max) break
+      out.push({ key, value: raw, unit: sensorMeta(key).unit, label: sensorMeta(key).label });
+      if (out.length >= max) break;
     }
   }
-  return out
+  return out;
 }
 
 function buildTelemetrySparkline(devices: DeviceDTO[] | undefined): number[] {
-  if (!devices || devices.length === 0) return []
-  const vals: number[] = []
+  if (!devices || devices.length === 0) return [];
+  const vals: number[] = [];
   for (const d of devices) {
-    if (d.status !== 'ONLINE' && d.status !== 'WARNING') continue
-    const readings = extractTwinReadings(d, 1)
-    if (readings.length > 0) vals.push(readings[0].value)
+    if (d.status !== 'ONLINE' && d.status !== 'WARNING') continue;
+    const readings = extractTwinReadings(d, 1);
+    if (readings.length > 0) vals.push(readings[0].value);
   }
-  return vals.slice(0, 12)
+  return vals.slice(0, 12);
 }
 
 // ─── Inline AlertSeverityBadge ──────────────────────────────────────────────
@@ -109,11 +109,11 @@ function AlertSeverityBadge({
   severity,
   className,
 }: {
-  severity: AlertSeverity
-  className?: string
+  severity: AlertSeverity;
+  className?: string;
 }) {
-  const meta = ALERT_SEVERITY_META[severity] ?? ALERT_SEVERITY_META.INFO
-  const Icon = meta.icon
+  const meta = ALERT_SEVERITY_META[severity] ?? ALERT_SEVERITY_META.INFO;
+  const Icon = meta.icon;
   return (
     <span
       className={cn(
@@ -127,14 +127,14 @@ function AlertSeverityBadge({
       <Icon className="size-2.5" />
       {meta.label}
     </span>
-  )
+  );
 }
 
 // ─── DashboardDeviceCard ─────────────────────────────────────────────────────
 
 function DashboardDeviceCard({ device }: { device: DeviceDTO }) {
-  const openDevice = useAppStore((s) => s.openDevice)
-  const readings = extractTwinReadings(device, 3)
+  const openDevice = useAppStore((s) => s.openDevice);
+  const readings = extractTwinReadings(device, 3);
 
   return (
     <motion.button
@@ -160,12 +160,12 @@ function DashboardDeviceCard({ device }: { device: DeviceDTO }) {
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-1.5">
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold tracking-tight leading-snug break-words">{device.name}</p>
+              <p className="text-sm font-semibold tracking-tight leading-snug break-words">
+                {device.name}
+              </p>
               <p className="mt-0.5 flex items-center gap-1 text-xs text-text-muted">
                 <MapPin className="size-3 shrink-0" />
-                <span className="truncate">
-                  {device.location?.name ?? 'Unassigned'}
-                </span>
+                <span className="truncate">{device.location?.name ?? 'Unassigned'}</span>
               </p>
             </div>
             <DeviceStatusBadge status={device.status} size="sm" />
@@ -178,7 +178,12 @@ function DashboardDeviceCard({ device }: { device: DeviceDTO }) {
 
       {/* Telemetry tiles — 2 cols on narrow screens, 3 when there's room */}
       {readings.length > 0 ? (
-        <div className={cn('grid gap-2', readings.length <= 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3')}>
+        <div
+          className={cn(
+            'grid gap-2',
+            readings.length <= 2 ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-3'
+          )}
+        >
           {readings.map((r) => (
             <TelemetryTile
               key={r.key}
@@ -206,7 +211,7 @@ function DashboardDeviceCard({ device }: { device: DeviceDTO }) {
         )}
       </div>
     </motion.button>
-  )
+  );
 }
 
 // ─── Skeletons ───────────────────────────────────────────────────────────────
@@ -227,7 +232,7 @@ function KpiSkeletonRow() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
 function DeviceGridSkeleton() {
@@ -251,34 +256,34 @@ function DeviceGridSkeleton() {
         </Card>
       ))}
     </div>
-  )
+  );
 }
 
 // ─── Recent Alerts panel ─────────────────────────────────────────────────────
 
 function RecentAlertsPanel({ alerts }: { alerts: AlertEventDTO[] }) {
-  const qc = useQueryClient()
-  const [acking, setAcking] = React.useState<string | null>(null)
+  const qc = useQueryClient();
+  const [acking, setAcking] = React.useState<string | null>(null);
 
   const acknowledge = React.useCallback(
     async (alert: AlertEventDTO) => {
-      setAcking(alert.id)
+      setAcking(alert.id);
       try {
-        const r = await fetch(`/api/alerts/${alert.id}/acknowledge`, { method: 'POST' })
-        if (!r.ok) throw new Error('Acknowledge failed')
-        toast.success(`Acknowledged "${alert.ruleName}"`)
-        qc.invalidateQueries({ queryKey: ['alerts'] })
-        qc.invalidateQueries({ queryKey: qk.dashboard })
+        const r = await fetch(`/api/alerts/${alert.id}/acknowledge`, { method: 'POST' });
+        if (!r.ok) throw new Error('Acknowledge failed');
+        toast.success(`Acknowledged "${alert.ruleName}"`);
+        qc.invalidateQueries({ queryKey: ['alerts'] });
+        qc.invalidateQueries({ queryKey: qk.dashboard });
       } catch (e) {
         toast.error('Failed to acknowledge alert', {
           description: e instanceof Error ? e.message : undefined,
-        })
+        });
       } finally {
-        setAcking(null)
+        setAcking(null);
       }
     },
     [qc]
-  )
+  );
 
   return (
     <Card className="flex h-full flex-col gap-0 overflow-hidden">
@@ -305,7 +310,7 @@ function RecentAlertsPanel({ alerts }: { alerts: AlertEventDTO[] }) {
           <ScrollArea className="max-h-96 pr-2">
             <ul className="space-y-2">
               {alerts.map((alert) => {
-                const isTriggered = alert.status === 'TRIGGERED'
+                const isTriggered = alert.status === 'TRIGGERED';
                 return (
                   <li
                     key={alert.id}
@@ -325,7 +330,9 @@ function RecentAlertsPanel({ alerts }: { alerts: AlertEventDTO[] }) {
                           )}
                         </div>
                         <p className="mt-1.5 text-sm font-medium leading-snug">{alert.ruleName}</p>
-                        <p className="mt-0.5 text-xs text-text-muted line-clamp-2">{alert.message}</p>
+                        <p className="mt-0.5 text-xs text-text-muted line-clamp-2">
+                          {alert.message}
+                        </p>
                       </div>
                       <time className="shrink-0 text-[10px] text-text-muted">
                         {timeAgo(alert.triggeredAt)}
@@ -348,14 +355,14 @@ function RecentAlertsPanel({ alerts }: { alerts: AlertEventDTO[] }) {
                       </Button>
                     </div>
                   </li>
-                )
+                );
               })}
             </ul>
           </ScrollArea>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // ─── Activity panel ──────────────────────────────────────────────────────────
@@ -380,24 +387,24 @@ function ActivityPanel({ events }: { events: AuditLogDTO[] }) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 // ─── Main DashboardView ─────────────────────────────────────────────────────
 
 export default function DashboardView() {
   // Realtime subscription — invalidates queries on socket events.
-  useRealtimeNotifications()
+  useRealtimeNotifications();
 
-  const { data, isLoading, isError, error } = useDashboard()
+  const { data, isLoading, isError, error } = useDashboard();
 
-  const stats = data?.stats
-  const environment: EnvironmentSnapshotDTO | null = data?.environment ?? null
-  const devices: DeviceDTO[] = data?.devices ?? []
-  const recentActivity = (data?.recentActivity ?? []) as unknown as AuditLogDTO[]
-  const recentAlerts = (data?.recentAlerts ?? []) as unknown as AlertEventDTO[]
+  const stats = data?.stats;
+  const environment: EnvironmentSnapshotDTO | null = data?.environment ?? null;
+  const devices: DeviceDTO[] = data?.devices ?? [];
+  const recentActivity = (data?.recentActivity ?? []) as unknown as AuditLogDTO[];
+  const recentAlerts = (data?.recentAlerts ?? []) as unknown as AlertEventDTO[];
 
-  const telemetrySparkline = React.useMemo(() => buildTelemetrySparkline(devices), [devices])
+  const telemetrySparkline = React.useMemo(() => buildTelemetrySparkline(devices), [devices]);
 
   // Motion variants for staggered entrance.
   const container = {
@@ -406,11 +413,11 @@ export default function DashboardView() {
       opacity: 1,
       transition: { staggerChildren: 0.04 },
     },
-  }
+  };
   const item = {
     hidden: { opacity: 0, y: 6 },
     show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
-  }
+  };
 
   return (
     <div className="min-h-screen flex flex-col gap-4 p-4 sm:gap-6 sm:p-6">
@@ -494,9 +501,7 @@ export default function DashboardView() {
               accent="danger"
               footer={
                 <span className={stats && stats.activeAlerts > 0 ? 'text-danger' : 'text-success'}>
-                  {stats && stats.activeAlerts > 0
-                    ? 'Requires attention'
-                    : 'All systems nominal'}
+                  {stats && stats.activeAlerts > 0 ? 'Requires attention' : 'All systems nominal'}
                 </span>
               }
             />
@@ -597,5 +602,5 @@ export default function DashboardView() {
         </motion.div>
       </section>
     </div>
-  )
+  );
 }

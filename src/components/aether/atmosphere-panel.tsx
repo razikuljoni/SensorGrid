@@ -1,42 +1,50 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { cn } from '@/lib/utils'
-import { Droplets, Gauge, Lightbulb, Thermometer, Wind } from 'lucide-react'
-import type { EnvironmentSnapshotDTO } from '@/lib/types'
-import { TelemetryTile } from './telemetry-tile'
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { Droplets, Gauge, Lightbulb, Thermometer, Wind } from 'lucide-react';
+import type { EnvironmentSnapshotDTO } from '@/lib/types';
+import { TelemetryTile } from './telemetry-tile';
 
 // ─── AtmospherePanel ─────────────────────────────────────────────────────────
 // Large environmental dashboard panel combining temperature, humidity, pressure,
 // air quality (CO2), and light. Features an ambient glow that responds to values.
 
 export interface AtmospherePanelProps {
-  snapshot: EnvironmentSnapshotDTO | null
-  className?: string
+  snapshot: EnvironmentSnapshotDTO | null;
+  className?: string;
 }
 
 export function AtmospherePanel({ snapshot, className }: AtmospherePanelProps) {
-  const temp = snapshot?.temperature ?? null
-  const humidity = snapshot?.humidity ?? null
-  const pressure = snapshot?.pressure ?? null
-  const light = snapshot?.light ?? null
-  const co2 = snapshot?.co2 ?? null
+  const temp = snapshot?.temperature ?? null;
+  const humidity = snapshot?.humidity ?? null;
+  const pressure = snapshot?.pressure ?? null;
+  const light = snapshot?.light ?? null;
+  const co2 = snapshot?.co2 ?? null;
 
   // Ambient glow position shifts with temperature (warmer → moves right/up)
-  const glowX = temp !== null ? Math.min(95, Math.max(5, ((temp + 10) / 50) * 100)) : 30
-  const glowY = humidity !== null ? Math.min(95, Math.max(5, 100 - humidity)) : 70
+  const glowX = temp !== null ? Math.min(95, Math.max(5, ((temp + 10) / 50) * 100)) : 30;
+  const glowY = humidity !== null ? Math.min(95, Math.max(5, 100 - humidity)) : 70;
 
   // Warm color shift on high temperature
-  const hotTemp = temp !== null && temp > 28
-  const coldTemp = temp !== null && temp < 18
+  const hotTemp = temp !== null && temp > 28;
+  const coldTemp = temp !== null && temp < 18;
 
   return (
-    <div className={cn('aether-glow relative overflow-hidden rounded-2xl border border-border bg-surface-elevated p-5', className)} style={{ ['--glow-x' as string]: `${glowX}%`, ['--glow-y' as string]: `${glowY}%` }}>
+    <div
+      className={cn(
+        'aether-glow relative overflow-hidden rounded-2xl border border-border bg-surface-elevated p-5',
+        className
+      )}
+      style={{ ['--glow-x' as string]: `${glowX}%`, ['--glow-y' as string]: `${glowY}%` }}
+    >
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold tracking-tight">Environment Overview</h3>
           <p className="text-xs text-text-muted mt-0.5">
-            {snapshot?.sourceDeviceName ? `Live from ${snapshot.sourceDeviceName}` : 'Awaiting telemetry'}
+            {snapshot?.sourceDeviceName
+              ? `Live from ${snapshot.sourceDeviceName}`
+              : 'Awaiting telemetry'}
           </p>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] text-text-muted">
@@ -89,5 +97,5 @@ export function AtmospherePanel({ snapshot, className }: AtmospherePanelProps) {
         />
       </div>
     </div>
-  )
+  );
 }

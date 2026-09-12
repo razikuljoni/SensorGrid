@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
 
 export async function GET() {
   return NextResponse.json({
@@ -27,5 +27,5 @@ export async function GET() {
       '/api/locations',
       '/api/auth',
     ],
-  })
+  });
 }
