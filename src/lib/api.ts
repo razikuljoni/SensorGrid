@@ -1,15 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
 
 // ─── DTO mappers (Prisma row → wire DTO) ─────────────────────────────────────
 // Shared across API routes so the frontend gets a consistent shape.
 
 export function toLocationDTO(loc: {
-  id: string
-  name: string
-  type: string
-  parentId: string | null
-  metadata: string
+  id: string;
+  name: string;
+  type: string;
+  parentId: string | null;
+  metadata: string;
 }) {
   return {
     id: loc.id,
@@ -17,18 +17,18 @@ export function toLocationDTO(loc: {
     type: loc.type,
     parentId: loc.parentId,
     metadata: safeParse(loc.metadata, {}),
-  }
+  };
 }
 
 export function toSensorDTO(s: {
-  id: string
-  deviceId: string
-  key: string
-  label: string
-  unit: string
-  dataType: string
-  min: number | null
-  max: number | null
+  id: string;
+  deviceId: string;
+  key: string;
+  label: string;
+  unit: string;
+  dataType: string;
+  min: number | null;
+  max: number | null;
 }) {
   return {
     id: s.id,
@@ -39,7 +39,7 @@ export function toSensorDTO(s: {
     dataType: s.dataType as 'number' | 'boolean' | 'string' | 'json',
     min: s.min,
     max: s.max,
-  }
+  };
 }
 
 export function toDeviceDTO(d: any) {
@@ -52,7 +52,7 @@ export function toDeviceDTO(d: any) {
     status: d.status,
     health: d.health,
     firmwareVersion: d.firmwareVersion,
-    ipAddress: (safeParse(d.metadata, {}) as Record<string, unknown>).ip as string | null ?? null,
+    ipAddress: ((safeParse(d.metadata, {}) as Record<string, unknown>).ip as string | null) ?? null,
     macAddress: d.macAddress,
     battery: d.battery,
     signal: d.signal,
@@ -75,7 +75,7 @@ export function toDeviceDTO(d: any) {
       : null,
     createdAt: d.createdAt.toISOString(),
     updatedAt: d.updatedAt.toISOString(),
-  }
+  };
 }
 
 export function toCommandDTO(c: any) {
@@ -93,7 +93,7 @@ export function toCommandDTO(c: any) {
     sentAt: c.sentAt?.toISOString() ?? null,
     acknowledgedAt: c.acknowledgedAt?.toISOString() ?? null,
     completedAt: c.completedAt?.toISOString() ?? null,
-  }
+  };
 }
 
 export function toAutomationDTO(a: any) {
@@ -113,7 +113,7 @@ export function toAutomationDTO(a: any) {
     failureCount: a.failureCount,
     createdAt: a.createdAt.toISOString(),
     updatedAt: a.updatedAt.toISOString(),
-  }
+  };
 }
 
 export function toAlertEventDTO(e: any) {
@@ -132,7 +132,7 @@ export function toAlertEventDTO(e: any) {
     acknowledgedBy: e.acknowledgedBy,
     resolvedAt: e.resolvedAt?.toISOString() ?? null,
     device: e.device ? { id: e.device.id, name: e.device.name } : null,
-  }
+  };
 }
 
 export function toNotificationDTO(n: any) {
@@ -146,7 +146,7 @@ export function toNotificationDTO(n: any) {
     read: n.read,
     metadata: safeParse(n.metadata, {}),
     createdAt: n.createdAt.toISOString(),
-  }
+  };
 }
 
 export function toAuditLogDTO(l: any) {
@@ -162,34 +162,34 @@ export function toAuditLogDTO(l: any) {
     metadata: safeParse(l.metadata, {}),
     ipAddress: l.ipAddress,
     createdAt: l.createdAt.toISOString(),
-  }
+  };
 }
 
 function safeParse<T>(json: string | null | undefined, fallback: T): T {
-  if (!json) return fallback
+  if (!json) return fallback;
   try {
-    return JSON.parse(json) as T
+    return JSON.parse(json) as T;
   } catch {
-    return fallback
+    return fallback;
   }
 }
 
 // ─── Org context (single demo org for this MVP) ───────────────────────────────
-export const DEMO_ORG_ID = 'org-sensorgrid-hq'
-export const DEMO_USER_ID = 'user-sensorgrid'
-export const DEMO_USER_NAME = 'SensorGrid Operator'
+export const DEMO_ORG_ID = 'org-sensorgrid-hq';
+export const DEMO_USER_ID = 'user-sensorgrid';
+export const DEMO_USER_NAME = 'SensorGrid Operator';
 
 export async function getOrgContext(_req: NextRequest) {
   // In a real app this would decode the session cookie and resolve the user's
   // active organization. For the MVP we use the single seeded demo org.
-  const org = await db.organization.findUnique({ where: { id: DEMO_ORG_ID } })
-  return org
+  const org = await db.organization.findUnique({ where: { id: DEMO_ORG_ID } });
+  return org;
 }
 
 export function ok(data: unknown, status = 200) {
-  return NextResponse.json(data, { status })
+  return NextResponse.json(data, { status });
 }
 
 export function error(message: string, status = 400) {
-  return NextResponse.json({ error: message }, { status })
+  return NextResponse.json({ error: message }, { status });
 }

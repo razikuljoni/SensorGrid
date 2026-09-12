@@ -1,33 +1,53 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { AlertTriangle, Bell, CheckCheck, Cpu, Info, ShieldAlert, Zap, type LucideIcon } from 'lucide-react'
-import { useNotifications, useRealtimeNotifications } from '@/lib/hooks'
-import { timeAgo, formatTime } from '@/lib/status'
-import type { NotificationCategory } from '@/lib/types'
+import * as React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import {
+  AlertTriangle,
+  Bell,
+  CheckCheck,
+  Cpu,
+  Info,
+  ShieldAlert,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react';
+import { useNotifications, useRealtimeNotifications } from '@/lib/hooks';
+import { timeAgo, formatTime } from '@/lib/status';
+import type { NotificationCategory } from '@/lib/types';
 
-const CATEGORY_META: Record<NotificationCategory, { icon: LucideIcon; color: string; label: string }> = {
+const CATEGORY_META: Record<
+  NotificationCategory,
+  { icon: LucideIcon; color: string; label: string }
+> = {
   DEVICE: { icon: Cpu, color: 'text-info bg-info/10', label: 'Device' },
   ALERT: { icon: AlertTriangle, color: 'text-warning bg-warning/10', label: 'Alert' },
   AUTOMATION: { icon: Zap, color: 'text-primary bg-primary/10', label: 'Automation' },
   SYSTEM: { icon: Info, color: 'text-text-muted bg-muted', label: 'System' },
   SECURITY: { icon: ShieldAlert, color: 'text-danger bg-danger/10', label: 'Security' },
-}
+};
 
 export function NotificationsView() {
-  useRealtimeNotifications()
-  const { notifications, markAllRead, markRead, isLoading } = useNotifications()
-  const [filter, setFilter] = React.useState<'all' | NotificationCategory>('all')
+  useRealtimeNotifications();
+  const { notifications, markAllRead, markRead, isLoading } = useNotifications();
+  const [filter, setFilter] = React.useState<'all' | NotificationCategory>('all');
 
-  const filtered = filter === 'all' ? notifications : notifications.filter((n) => n.category === filter)
-  const unreadCount = notifications.filter((n) => !n.read).length
+  const filtered =
+    filter === 'all' ? notifications : notifications.filter((n) => n.category === filter);
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
-  const categories: Array<'all' | NotificationCategory> = ['all', 'DEVICE', 'ALERT', 'AUTOMATION', 'SYSTEM', 'SECURITY']
+  const categories: Array<'all' | NotificationCategory> = [
+    'all',
+    'DEVICE',
+    'ALERT',
+    'AUTOMATION',
+    'SYSTEM',
+    'SECURITY',
+  ];
 
   return (
     <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
@@ -37,10 +57,20 @@ export function NotificationsView() {
             <CardTitle className="text-base flex items-center gap-2">
               <Bell className="size-4" />
               Notifications
-              {unreadCount > 0 && <Badge className="bg-danger text-danger-foreground h-5 px-1.5 text-[10px]">{unreadCount} unread</Badge>}
+              {unreadCount > 0 && (
+                <Badge className="bg-danger text-danger-foreground h-5 px-1.5 text-[10px]">
+                  {unreadCount} unread
+                </Badge>
+              )}
             </CardTitle>
           </div>
-          <Button variant="ghost" size="sm" className="text-xs h-7 gap-1" onClick={markAllRead} disabled={unreadCount === 0}>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs h-7 gap-1"
+            onClick={markAllRead}
+            disabled={unreadCount === 0}
+          >
             <CheckCheck className="size-3" /> Mark all read
           </Button>
         </CardHeader>
@@ -77,8 +107,9 @@ export function NotificationsView() {
             ) : (
               <ul className="divide-y divide-border">
                 {filtered.map((n) => {
-                  const meta = CATEGORY_META[n.category as NotificationCategory] ?? CATEGORY_META.SYSTEM
-                  const Icon = meta.icon
+                  const meta =
+                    CATEGORY_META[n.category as NotificationCategory] ?? CATEGORY_META.SYSTEM;
+                  const Icon = meta.icon;
                   return (
                     <li key={n.id}>
                       <button
@@ -86,23 +117,32 @@ export function NotificationsView() {
                         onClick={() => !n.read && markRead(n.id)}
                         className={`flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/60 ${!n.read ? 'bg-accent/20' : ''}`}
                       >
-                        <span className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg ${meta.color}`}>
+                        <span
+                          className={`mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg ${meta.color}`}
+                        >
                           <Icon className="size-4" />
                         </span>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-sm font-medium leading-tight">{n.title}</p>
                             <div className="flex items-center gap-2 shrink-0">
-                              <Badge variant="outline" className="text-[9px] h-4 px-1">{meta.label}</Badge>
+                              <Badge variant="outline" className="text-[9px] h-4 px-1">
+                                {meta.label}
+                              </Badge>
                               {!n.read && <span className="size-1.5 rounded-full bg-danger" />}
                             </div>
                           </div>
                           <p className="mt-1 text-xs text-text-muted">{n.message}</p>
-                          <p className="mt-1 text-[10px] text-text-muted" title={formatTime(n.createdAt)}>{timeAgo(n.createdAt)}</p>
+                          <p
+                            className="mt-1 text-[10px] text-text-muted"
+                            title={formatTime(n.createdAt)}
+                          >
+                            {timeAgo(n.createdAt)}
+                          </p>
                         </div>
                       </button>
                     </li>
-                  )
+                  );
                 })}
               </ul>
             )}
@@ -110,5 +150,5 @@ export function NotificationsView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

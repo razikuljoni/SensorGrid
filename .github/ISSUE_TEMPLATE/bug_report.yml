@@ -1,0 +1,39 @@
+name: Bug Report
+description: Create a report to help us fix a bug or unexpected behavior
+labels: ['bug']
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: Clear description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Steps to reproduce the behavior.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment Info
+      description: Browser, Node.js version, OS, etc.
+      placeholder: |
+        - OS: macOS / Linux / Windows
+        - Browser: Chrome / Firefox / Safari
+        - Node version: 20.x

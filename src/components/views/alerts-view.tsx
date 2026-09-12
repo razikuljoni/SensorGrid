@@ -1,8 +1,8 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import * as React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import {
   Activity,
   AlertTriangle,
@@ -17,16 +17,11 @@ import {
   ShieldCheck,
   Sliders,
   Thermometer,
-} from 'lucide-react'
+} from 'lucide-react';
 
-import { cn } from '@/lib/utils'
-import { useAlerts, useDevices, qk } from '@/lib/hooks'
-import {
-  ALERT_SEVERITY_META,
-  ALERT_STATUS_META,
-  timeAgo,
-  formatTime,
-} from '@/lib/status'
+import { cn } from '@/lib/utils';
+import { useAlerts, useDevices, qk } from '@/lib/hooks';
+import { ALERT_SEVERITY_META, ALERT_STATUS_META, timeAgo, formatTime } from '@/lib/status';
 import type {
   AlertCondition,
   AlertEventDTO,
@@ -34,16 +29,16 @@ import type {
   AlertSeverity,
   AlertStatus,
   DeviceDTO,
-} from '@/lib/types'
+} from '@/lib/types';
 
-import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Dialog,
   DialogContent,
@@ -51,26 +46,21 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from '@/components/ui/tabs'
+} from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
 // The /api/alerts endpoint extends each rule with a `device` reference (for display).
 // The base AlertRuleDTO doesn't include it, so we extend locally.
 type AlertRuleWithDevice = AlertRuleDTO & {
-  device?: { id: string; name: string } | null
-}
+  device?: { id: string; name: string } | null;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Local AlertSeverityBadge / AlertStatusBadge
@@ -82,12 +72,12 @@ export function AlertSeverityBadge({
   size = 'md',
   className,
 }: {
-  severity: AlertSeverity
-  size?: 'sm' | 'md'
-  className?: string
+  severity: AlertSeverity;
+  size?: 'sm' | 'md';
+  className?: string;
 }) {
-  const meta = ALERT_SEVERITY_META[severity]
-  const Icon = meta.icon
+  const meta = ALERT_SEVERITY_META[severity];
+  const Icon = meta.icon;
   return (
     <span
       className={cn(
@@ -103,7 +93,7 @@ export function AlertSeverityBadge({
       <Icon className={cn(size === 'sm' ? 'size-2.5' : 'size-3')} />
       <span>{meta.label}</span>
     </span>
-  )
+  );
 }
 
 export function AlertStatusBadge({
@@ -111,12 +101,12 @@ export function AlertStatusBadge({
   size = 'md',
   className,
 }: {
-  status: AlertStatus
-  size?: 'sm' | 'md'
-  className?: string
+  status: AlertStatus;
+  size?: 'sm' | 'md';
+  className?: string;
 }) {
-  const meta = ALERT_STATUS_META[status]
-  const Icon = meta.icon
+  const meta = ALERT_STATUS_META[status];
+  const Icon = meta.icon;
   return (
     <span
       className={cn(
@@ -132,7 +122,7 @@ export function AlertStatusBadge({
       <Icon className={cn(size === 'sm' ? 'size-2.5' : 'size-3')} />
       <span>{meta.label}</span>
     </span>
-  )
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -148,7 +138,7 @@ const CONDITION_SYMBOL: Record<AlertCondition, string> = {
   NEQ: '≠',
   OFFLINE_FOR: 'offline for',
   BATTERY_BELOW: 'battery <',
-}
+};
 
 const CONDITION_LABEL: Record<AlertCondition, string> = {
   GT: 'Greater Than',
@@ -159,27 +149,31 @@ const CONDITION_LABEL: Record<AlertCondition, string> = {
   NEQ: 'Not Equal',
   OFFLINE_FOR: 'Offline For (s)',
   BATTERY_BELOW: 'Battery Below',
-}
+};
 
-function formatCondition(rule: { condition: AlertCondition; sensorKey: string | null; threshold: number | null }): string {
-  const sym = CONDITION_SYMBOL[rule.condition] ?? '?'
+function formatCondition(rule: {
+  condition: AlertCondition;
+  sensorKey: string | null;
+  threshold: number | null;
+}): string {
+  const sym = CONDITION_SYMBOL[rule.condition] ?? '?';
   if (rule.condition === 'OFFLINE_FOR') {
-    return `offline_for ${rule.threshold ?? 0}s`
+    return `offline_for ${rule.threshold ?? 0}s`;
   }
   if (rule.condition === 'BATTERY_BELOW') {
-    return `battery < ${rule.threshold ?? 0}`
+    return `battery < ${rule.threshold ?? 0}`;
   }
-  const key = rule.sensorKey ?? 'value'
-  const t = rule.threshold ?? 0
-  return `${key} ${sym} ${t}`
+  const key = rule.sensorKey ?? 'value';
+  const t = rule.threshold ?? 0;
+  return `${key} ${sym} ${t}`;
 }
 
 function formatCooldown(seconds: number): string {
-  if (!seconds || seconds <= 0) return 'No cooldown'
-  if (seconds < 60) return `${seconds}s cooldown`
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m cooldown`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h cooldown`
-  return `${Math.floor(seconds / 86400)}d cooldown`
+  if (!seconds || seconds <= 0) return 'No cooldown';
+  if (seconds < 60) return `${seconds}s cooldown`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m cooldown`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h cooldown`;
+  return `${Math.floor(seconds / 86400)}d cooldown`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -187,15 +181,15 @@ function formatCooldown(seconds: number): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface AlertEventRowProps {
-  event: AlertEventDTO
-  onAcknowledge: (id: string) => void
-  onResolve: (id: string) => void
-  busy: boolean
+  event: AlertEventDTO;
+  onAcknowledge: (id: string) => void;
+  onResolve: (id: string) => void;
+  busy: boolean;
 }
 
 function AlertEventRow({ event, onAcknowledge, onResolve, busy }: AlertEventRowProps) {
-  const canAck = event.status === 'TRIGGERED'
-  const canResolve = event.status === 'TRIGGERED' || event.status === 'ACKNOWLEDGED'
+  const canAck = event.status === 'TRIGGERED';
+  const canResolve = event.status === 'TRIGGERED' || event.status === 'ACKNOWLEDGED';
 
   return (
     <Card className="p-4 gap-3">
@@ -208,7 +202,13 @@ function AlertEventRow({ event, onAcknowledge, onResolve, busy }: AlertEventRowP
               ALERT_SEVERITY_META[event.severity].color
             )}
           >
-            {event.severity === 'CRITICAL' ? <ShieldAlert className="size-4" /> : event.severity === 'WARNING' ? <AlertTriangle className="size-4" /> : <Activity className="size-4" />}
+            {event.severity === 'CRITICAL' ? (
+              <ShieldAlert className="size-4" />
+            ) : event.severity === 'WARNING' ? (
+              <AlertTriangle className="size-4" />
+            ) : (
+              <Activity className="size-4" />
+            )}
           </span>
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -250,11 +250,7 @@ function AlertEventRow({ event, onAcknowledge, onResolve, busy }: AlertEventRowP
             </Button>
           )}
           {canResolve && (
-            <Button
-              size="sm"
-              disabled={busy}
-              onClick={() => onResolve(event.id)}
-            >
+            <Button size="sm" disabled={busy} onClick={() => onResolve(event.id)}>
               <ShieldCheck className="size-3.5" /> Resolve
             </Button>
           )}
@@ -266,7 +262,7 @@ function AlertEventRow({ event, onAcknowledge, onResolve, busy }: AlertEventRowP
         </div>
       </div>
     </Card>
-  )
+  );
 }
 
 function AlertEventSkeleton() {
@@ -285,7 +281,7 @@ function AlertEventSkeleton() {
         </div>
       </div>
     </Card>
-  )
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -293,11 +289,11 @@ function AlertEventSkeleton() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface AlertRuleCardProps {
-  rule: AlertRuleWithDevice
+  rule: AlertRuleWithDevice;
 }
 
 function AlertRuleCard({ rule }: AlertRuleCardProps) {
-  const condition = formatCondition(rule)
+  const condition = formatCondition(rule);
   return (
     <Card className="p-4 gap-3">
       <div className="flex items-start justify-between gap-2">
@@ -356,7 +352,7 @@ function AlertRuleCard({ rule }: AlertRuleCardProps) {
         </div>
       </div>
     </Card>
-  )
+  );
 }
 
 function AlertRuleSkeleton() {
@@ -378,7 +374,7 @@ function AlertRuleSkeleton() {
       </div>
       <Skeleton className="h-12 w-full" />
     </Card>
-  )
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -386,51 +382,51 @@ function AlertRuleSkeleton() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface NewAlertRuleDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 function NewAlertRuleDialog({ open, onOpenChange }: NewAlertRuleDialogProps) {
-  const qc = useQueryClient()
-  const { data: devices } = useDevices()
+  const qc = useQueryClient();
+  const { data: devices } = useDevices();
 
-  const [name, setName] = React.useState('')
-  const [description, setDescription] = React.useState('')
-  const [deviceId, setDeviceId] = React.useState<string>('')
-  const [selectedDevice, setSelectedDevice] = React.useState<DeviceDTO | null>(null)
-  const [sensorKey, setSensorKey] = React.useState<string>('')
-  const [condition, setCondition] = React.useState<AlertCondition>('GT')
-  const [threshold, setThreshold] = React.useState<string>('30')
-  const [severity, setSeverity] = React.useState<AlertSeverity>('WARNING')
-  const [saving, setSaving] = React.useState(false)
+  const [name, setName] = React.useState('');
+  const [description, setDescription] = React.useState('');
+  const [deviceId, setDeviceId] = React.useState<string>('');
+  const [selectedDevice, setSelectedDevice] = React.useState<DeviceDTO | null>(null);
+  const [sensorKey, setSensorKey] = React.useState<string>('');
+  const [condition, setCondition] = React.useState<AlertCondition>('GT');
+  const [threshold, setThreshold] = React.useState<string>('30');
+  const [severity, setSeverity] = React.useState<AlertSeverity>('WARNING');
+  const [saving, setSaving] = React.useState(false);
 
   // Reset sensor when device changes
   React.useEffect(() => {
-    setSensorKey('')
-  }, [deviceId])
+    setSensorKey('');
+  }, [deviceId]);
 
-  const devicesList = devices ?? []
-  const currentDevice = devicesList.find((d) => d.id === deviceId) ?? null
+  const devicesList = devices ?? [];
+  const currentDevice = devicesList.find((d) => d.id === deviceId) ?? null;
   React.useEffect(() => {
-    setSelectedDevice(currentDevice ?? null)
-  }, [currentDevice])
+    setSelectedDevice(currentDevice ?? null);
+  }, [currentDevice]);
 
   const reset = () => {
-    setName('')
-    setDescription('')
-    setDeviceId('')
-    setSensorKey('')
-    setCondition('GT')
-    setThreshold('30')
-    setSeverity('WARNING')
-  }
+    setName('');
+    setDescription('');
+    setDeviceId('');
+    setSensorKey('');
+    setCondition('GT');
+    setThreshold('30');
+    setSeverity('WARNING');
+  };
 
   const submit = async () => {
     if (!name.trim()) {
-      toast.error('Name is required')
-      return
+      toast.error('Name is required');
+      return;
     }
-    setSaving(true)
+    setSaving(true);
     try {
       const body = {
         name: name.trim(),
@@ -442,63 +438,105 @@ function NewAlertRuleDialog({ open, onOpenChange }: NewAlertRuleDialogProps) {
         severity,
         enabled: true,
         cooldownSeconds: 300,
-      }
+      };
       const r = await fetch('/api/alerts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
-      })
-      if (!r.ok) throw new Error('Failed to create alert rule')
-      toast.success('Alert rule created', { description: name.trim() })
-      qc.invalidateQueries({ queryKey: ['alerts'] })
-      onOpenChange(false)
-      reset()
+      });
+      if (!r.ok) throw new Error('Failed to create alert rule');
+      toast.success('Alert rule created', { description: name.trim() });
+      qc.invalidateQueries({ queryKey: ['alerts'] });
+      onOpenChange(false);
+      reset();
     } catch (err) {
-      toast.error('Could not create alert rule', { description: err instanceof Error ? err.message : 'Unknown error' })
+      toast.error('Could not create alert rule', {
+        description: err instanceof Error ? err.message : 'Unknown error',
+      });
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
-  const sensorOptions = selectedDevice?.sensors ?? []
+  const sensorOptions = selectedDevice?.sensors ?? [];
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!saving) { onOpenChange(o); if (!o) reset() } }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!saving) {
+          onOpenChange(o);
+          if (!o) reset();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>New Alert Rule</DialogTitle>
-          <DialogDescription>Define a condition that triggers an alert event when breached.</DialogDescription>
+          <DialogDescription>
+            Define a condition that triggers an alert event when breached.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="rule-name">Name</Label>
-            <Input id="rule-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Server room overheat" />
+            <Input
+              id="rule-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="e.g. Server room overheat"
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="rule-desc">Description</Label>
-            <Input id="rule-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="What this rule watches for" />
+            <Input
+              id="rule-desc"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="What this rule watches for"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
               <Label>Device</Label>
               <Select value={deviceId} onValueChange={setDeviceId}>
-                <SelectTrigger><SelectValue placeholder="Any device" /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue placeholder="Any device" />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Any device</SelectItem>
                   {devicesList.map((d) => (
-                    <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Sensor Key</Label>
-              <Select value={sensorKey} onValueChange={setSensorKey} disabled={!selectedDevice || sensorOptions.length === 0}>
-                <SelectTrigger><SelectValue placeholder={selectedDevice ? (sensorOptions.length ? 'Pick sensor' : 'No sensors') : 'Pick device first'} /></SelectTrigger>
+              <Select
+                value={sensorKey}
+                onValueChange={setSensorKey}
+                disabled={!selectedDevice || sensorOptions.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue
+                    placeholder={
+                      selectedDevice
+                        ? sensorOptions.length
+                          ? 'Pick sensor'
+                          : 'No sensors'
+                        : 'Pick device first'
+                    }
+                  />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Any sensor</SelectItem>
                   {sensorOptions.map((s) => (
-                    <SelectItem key={s.id} value={s.key}>{s.key}</SelectItem>
+                    <SelectItem key={s.id} value={s.key}>
+                      {s.key}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -508,10 +546,14 @@ function NewAlertRuleDialog({ open, onOpenChange }: NewAlertRuleDialogProps) {
             <div className="flex flex-col gap-1.5">
               <Label>Condition</Label>
               <Select value={condition} onValueChange={(v) => setCondition(v as AlertCondition)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   {(Object.keys(CONDITION_LABEL) as AlertCondition[]).map((c) => (
-                    <SelectItem key={c} value={c}>{CONDITION_LABEL[c]}</SelectItem>
+                    <SelectItem key={c} value={c}>
+                      {CONDITION_LABEL[c]}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -531,7 +573,9 @@ function NewAlertRuleDialog({ open, onOpenChange }: NewAlertRuleDialogProps) {
           <div className="flex flex-col gap-1.5">
             <Label>Severity</Label>
             <Select value={severity} onValueChange={(v) => setSeverity(v as AlertSeverity)}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="INFO">Info</SelectItem>
                 <SelectItem value="WARNING">Warning</SelectItem>
@@ -549,14 +593,16 @@ function NewAlertRuleDialog({ open, onOpenChange }: NewAlertRuleDialogProps) {
           )}
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+            Cancel
+          </Button>
           <Button onClick={submit} disabled={saving || !name.trim()}>
             {saving ? 'Creating...' : 'Create Rule'}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -564,50 +610,50 @@ function NewAlertRuleDialog({ open, onOpenChange }: NewAlertRuleDialogProps) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function AlertsView() {
-  const qc = useQueryClient()
-  const [newOpen, setNewOpen] = React.useState(false)
-  const [eventFilter, setEventFilter] = React.useState<'all' | AlertStatus>('all')
-  const [busyId, setBusyId] = React.useState<string | null>(null)
+  const qc = useQueryClient();
+  const [newOpen, setNewOpen] = React.useState(false);
+  const [eventFilter, setEventFilter] = React.useState<'all' | AlertStatus>('all');
+  const [busyId, setBusyId] = React.useState<string | null>(null);
 
   // Always fetch all events (status omitted) so we can filter client-side
-  const { data, isLoading, isError, refetch } = useAlerts(undefined)
-  const events: AlertEventDTO[] = React.useMemo(() => data?.events ?? [], [data])
-  const rules: AlertRuleWithDevice[] = React.useMemo(() => data?.rules ?? [], [data])
+  const { data, isLoading, isError, refetch } = useAlerts(undefined);
+  const events: AlertEventDTO[] = React.useMemo(() => data?.events ?? [], [data]);
+  const rules: AlertRuleWithDevice[] = React.useMemo(() => data?.rules ?? [], [data]);
 
   const filteredEvents = React.useMemo(() => {
-    if (eventFilter === 'all') return events
-    return events.filter((e) => e.status === eventFilter)
-  }, [events, eventFilter])
+    if (eventFilter === 'all') return events;
+    return events.filter((e) => e.status === eventFilter);
+  }, [events, eventFilter]);
 
   const triggeredCount = React.useMemo(
     () => events.filter((e) => e.status === 'TRIGGERED').length,
     [events]
-  )
+  );
   const acknowledgedCount = React.useMemo(
     () => events.filter((e) => e.status === 'ACKNOWLEDGED').length,
     [events]
-  )
+  );
   const resolvedCount = React.useMemo(
     () => events.filter((e) => e.status === 'RESOLVED').length,
     [events]
-  )
-  const activeRules = React.useMemo(() => rules.filter((r) => r.enabled).length, [rules])
+  );
+  const activeRules = React.useMemo(() => rules.filter((r) => r.enabled).length, [rules]);
 
   const patchEvent = async (id: string, action: 'acknowledge' | 'resolve') => {
-    setBusyId(id)
+    setBusyId(id);
     try {
-      const r = await fetch(`/api/alerts/${id}/${action}`, { method: 'PATCH' })
-      if (!r.ok) throw new Error(`Failed to ${action} alert`)
-      toast.success(`Alert ${action === 'acknowledge' ? 'acknowledged' : 'resolved'}`)
-      qc.invalidateQueries({ queryKey: ['alerts'] })
+      const r = await fetch(`/api/alerts/${id}/${action}`, { method: 'PATCH' });
+      if (!r.ok) throw new Error(`Failed to ${action} alert`);
+      toast.success(`Alert ${action === 'acknowledge' ? 'acknowledged' : 'resolved'}`);
+      qc.invalidateQueries({ queryKey: ['alerts'] });
     } catch (err) {
       toast.error(`Could not ${action} alert`, {
         description: err instanceof Error ? err.message : 'Unknown error',
-      })
+      });
     } finally {
-      setBusyId(null)
+      setBusyId(null);
     }
-  }
+  };
 
   return (
     <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
@@ -619,7 +665,9 @@ export function AlertsView() {
           </span>
           <div>
             <h1 className="text-xl font-semibold tracking-tight">Alerts</h1>
-            <p className="text-xs text-text-muted">Monitor active alert events and configure alerting rules.</p>
+            <p className="text-xs text-text-muted">
+              Monitor active alert events and configure alerting rules.
+            </p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -645,7 +693,9 @@ export function AlertsView() {
       {isError ? (
         <Card className="p-6 text-center">
           <p className="text-sm font-medium text-danger">Failed to load alerts.</p>
-          <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>Try again</Button>
+          <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>
+            Try again
+          </Button>
         </Card>
       ) : (
         <div className="flex flex-col gap-6">
@@ -662,7 +712,10 @@ export function AlertsView() {
             </div>
 
             {/* Event filter tabs */}
-            <Tabs value={eventFilter} onValueChange={(v) => setEventFilter(v as typeof eventFilter)}>
+            <Tabs
+              value={eventFilter}
+              onValueChange={(v) => setEventFilter(v as typeof eventFilter)}
+            >
               <TabsList className="w-full justify-start overflow-x-auto">
                 <TabsTrigger value="all">All ({events.length})</TabsTrigger>
                 <TabsTrigger value="TRIGGERED">Triggered ({triggeredCount})</TabsTrigger>
@@ -682,7 +735,9 @@ export function AlertsView() {
                       <CheckCircle2 className="size-5" />
                     </div>
                     <p className="text-sm font-medium">
-                      {eventFilter === 'all' ? 'No alert events yet' : `No ${eventFilter.toLowerCase()} events`}
+                      {eventFilter === 'all'
+                        ? 'No alert events yet'
+                        : `No ${eventFilter.toLowerCase()} events`}
                     </p>
                     <p className="mt-1 text-xs text-text-muted">
                       {eventFilter === 'all'
@@ -732,7 +787,9 @@ export function AlertsView() {
                   <Sliders className="size-5" />
                 </div>
                 <p className="text-sm font-medium">No alert rules configured</p>
-                <p className="mt-1 text-xs text-text-muted">Create a rule to start receiving alerts when conditions breach.</p>
+                <p className="mt-1 text-xs text-text-muted">
+                  Create a rule to start receiving alerts when conditions breach.
+                </p>
                 <Button size="sm" className="mt-4" onClick={() => setNewOpen(true)}>
                   <Plus className="size-3.5" /> New Alert Rule
                 </Button>
@@ -748,7 +805,7 @@ export function AlertsView() {
         </div>
       )}
     </div>
-  )
+  );
 }
 
 function KpiCard({
@@ -757,10 +814,10 @@ function KpiCard({
   accent,
   icon: Icon,
 }: {
-  label: string
-  value: number
-  accent: 'primary' | 'success' | 'warning' | 'danger' | 'info'
-  icon: typeof Activity
+  label: string;
+  value: number;
+  accent: 'primary' | 'success' | 'warning' | 'danger' | 'info';
+  icon: typeof Activity;
 }) {
   const accentClass: Record<typeof accent, string> = {
     primary: 'text-primary bg-primary/10',
@@ -768,18 +825,20 @@ function KpiCard({
     warning: 'text-warning bg-warning/10',
     danger: 'text-danger bg-danger/10',
     info: 'text-info bg-info/10',
-  }
+  };
   return (
     <Card className="p-4 gap-2">
       <div className="flex items-center justify-between gap-2">
-        <span className={cn('flex size-8 items-center justify-center rounded-lg', accentClass[accent])}>
+        <span
+          className={cn('flex size-8 items-center justify-center rounded-lg', accentClass[accent])}
+        >
           <Icon className="size-4" />
         </span>
         <span className="text-2xl font-semibold tabular-nums">{value}</span>
       </div>
       <p className="text-xs text-text-muted">{label}</p>
     </Card>
-  )
+  );
 }
 
-export default AlertsView
+export default AlertsView;

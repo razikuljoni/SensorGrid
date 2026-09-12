@@ -1,31 +1,26 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { cn } from '@/lib/utils'
-import { useAppStore } from '@/lib/store'
-import { useDevices } from '@/lib/hooks'
-import {
-  batteryMeta,
-  signalMeta,
-  timeAgo,
-  DEVICE_STATUS_META,
-} from '@/lib/status'
-import type { DeviceDTO, DeviceType } from '@/lib/types'
-import { DeviceOrb } from '@/components/aether/device-orb'
-import { DeviceStatusBadge } from '@/components/aether/status-badge'
-import { useToast } from '@/hooks/use-toast'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Card } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import * as React from 'react';
+import { cn } from '@/lib/utils';
+import { useAppStore } from '@/lib/store';
+import { useDevices } from '@/lib/hooks';
+import { batteryMeta, signalMeta, timeAgo, DEVICE_STATUS_META } from '@/lib/status';
+import type { DeviceDTO, DeviceType } from '@/lib/types';
+import { DeviceOrb } from '@/components/aether/device-orb';
+import { DeviceStatusBadge } from '@/components/aether/status-badge';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
+} from '@/components/ui/select';
 import {
   Dialog,
   DialogContent,
@@ -34,16 +29,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog'
-import {
-  ChevronRight,
-  Cpu,
-  MapPin,
-  Plug,
-  Plus,
-  Search,
-  WifiOff,
-} from 'lucide-react'
+} from '@/components/ui/dialog';
+import { ChevronRight, Cpu, MapPin, Plug, Plus, Search, WifiOff } from 'lucide-react';
 
 // ─── Status filter options ───────────────────────────────────────────────────
 const STATUS_OPTIONS: { value: string; label: string }[] = [
@@ -53,31 +40,37 @@ const STATUS_OPTIONS: { value: string; label: string }[] = [
   { value: 'WARNING', label: 'Warning' },
   { value: 'CRITICAL', label: 'Critical' },
   { value: 'SLEEPING', label: 'Sleeping' },
-]
+];
 
-const DEVICE_TYPES: DeviceType[] = ['ESP32', 'RPI', 'ARDUINO', 'GATEWAY', 'GENERIC']
+const DEVICE_TYPES: DeviceType[] = ['ESP32', 'RPI', 'ARDUINO', 'GATEWAY', 'GENERIC'];
 
 // ─── Devices view ────────────────────────────────────────────────────────────
 export function DevicesView() {
-  const openDevice = useAppStore((s) => s.openDevice)
-  const { toast } = useToast()
+  const openDevice = useAppStore((s) => s.openDevice);
+  const { toast } = useToast();
 
-  const [status, setStatus] = React.useState<string>('ALL')
-  const [q, setQ] = React.useState<string>('')
+  const [status, setStatus] = React.useState<string>('ALL');
+  const [q, setQ] = React.useState<string>('');
   // Debounce search input — 250ms
-  const [qInput, setQInput] = React.useState<string>('')
+  const [qInput, setQInput] = React.useState<string>('');
   React.useEffect(() => {
-    const t = setTimeout(() => setQ(qInput.trim()), 250)
-    return () => clearTimeout(t)
-  }, [qInput])
+    const t = setTimeout(() => setQ(qInput.trim()), 250);
+    return () => clearTimeout(t);
+  }, [qInput]);
 
-  const { data: devices, isLoading, isError, refetch } = useDevices(
-    status === 'ALL' ? undefined : status,
-    q || undefined,
-  )
+  const {
+    data: devices,
+    isLoading,
+    isError,
+    refetch,
+  } = useDevices(status === 'ALL' ? undefined : status, q || undefined);
 
-  const [addOpen, setAddOpen] = React.useState(false)
-  const [addForm, setAddForm] = React.useState({ name: '', type: 'ESP32' as DeviceType, location: '' })
+  const [addOpen, setAddOpen] = React.useState(false);
+  const [addForm, setAddForm] = React.useState({
+    name: '',
+    type: 'ESP32' as DeviceType,
+    location: '',
+  });
 
   const onSubmitAdd = () => {
     // MVP: no MQTT credentials are wired up — surface a toast and reset.
@@ -85,10 +78,10 @@ export function DevicesView() {
     toast({
       title: 'Device registration requires MQTT credentials',
       description: 'Configure a device credential in Settings → MQTT Broker first.',
-    })
-    setAddOpen(false)
-    setAddForm({ name: '', type: 'ESP32', location: '' })
-  }
+    });
+    setAddOpen(false);
+    setAddForm({ name: '', type: 'ESP32', location: '' });
+  };
 
   return (
     <div className="flex flex-col gap-4 p-4 sm:gap-6 sm:p-6">
@@ -137,8 +130,8 @@ export function DevicesView() {
             <DialogHeader>
               <DialogTitle>Register a new device</DialogTitle>
               <DialogDescription>
-                Provide basic info to provision a device in the registry. Live
-                ingestion requires MQTT credentials — see Settings.
+                Provide basic info to provision a device in the registry. Live ingestion requires
+                MQTT credentials — see Settings.
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-3">
@@ -187,8 +180,8 @@ export function DevicesView() {
                 </div>
               </div>
               <p className="rounded-md border border-border bg-muted/40 p-3 text-xs text-text-muted">
-                <span className="font-medium text-text-secondary">Note:</span> Device
-                registration requires MQTT credentials — see Settings.
+                <span className="font-medium text-text-secondary">Note:</span> Device registration
+                requires MQTT credentials — see Settings.
               </p>
             </div>
             <DialogFooter>
@@ -210,7 +203,7 @@ export function DevicesView() {
         onOpen={openDevice}
       />
     </div>
-  )
+  );
 }
 
 // ─── Body: loading / empty / grid ────────────────────────────────────────────
@@ -221,11 +214,11 @@ function DevicesBody({
   onRetry,
   onOpen,
 }: {
-  devices: DeviceDTO[] | undefined
-  isLoading: boolean
-  isError: boolean
-  onRetry: () => void
-  onOpen: (id: string) => void
+  devices: DeviceDTO[] | undefined;
+  isLoading: boolean;
+  isError: boolean;
+  onRetry: () => void;
+  onOpen: (id: string) => void;
 }) {
   if (isLoading) {
     return (
@@ -234,7 +227,7 @@ function DevicesBody({
           <DeviceCardSkeleton key={i} />
         ))}
       </div>
-    )
+    );
   }
 
   if (isError) {
@@ -251,7 +244,7 @@ function DevicesBody({
           Retry
         </Button>
       </Card>
-    )
+    );
   }
 
   if (!devices || devices.length === 0) {
@@ -267,7 +260,7 @@ function DevicesBody({
           </p>
         </div>
       </Card>
-    )
+    );
   }
 
   return (
@@ -276,7 +269,7 @@ function DevicesBody({
         <DeviceCard key={d.id} device={d} onOpen={() => onOpen(d.id)} />
       ))}
     </div>
-  )
+  );
 }
 
 // ─── Device type icon (statically declared) ─────────────────────────────────
@@ -286,33 +279,33 @@ const DEVICE_TYPE_ICON: Record<DeviceType, typeof Cpu> = {
   ARDUINO: Cpu,
   GATEWAY: Plug,
   GENERIC: Cpu,
-}
+};
 
 function DeviceTypeIcon({ type, className }: { type: DeviceType; className?: string }) {
-  const Icon = DEVICE_TYPE_ICON[type] ?? Cpu
-  return <Icon className={className} />
+  const Icon = DEVICE_TYPE_ICON[type] ?? Cpu;
+  return <Icon className={className} />;
 }
 
 // ─── Device card ─────────────────────────────────────────────────────────────
 function DeviceCard({ device, onOpen }: { device: DeviceDTO; onOpen: () => void }) {
-  const bat = batteryMeta(device.battery)
-  const sig = signalMeta(device.signal)
-  const BatIcon = bat.icon
-  const SigIcon = sig.icon
+  const bat = batteryMeta(device.battery);
+  const sig = signalMeta(device.signal);
+  const BatIcon = bat.icon;
+  const SigIcon = sig.icon;
 
   return (
     <Card
       className={cn(
         'group relative p-4 gap-0 overflow-hidden transition-all hover:shadow-md hover:border-border-subtle',
-        'cursor-pointer',
+        'cursor-pointer'
       )}
       role="button"
       tabIndex={0}
       onClick={onOpen}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          onOpen()
+          e.preventDefault();
+          onOpen();
         }
       }}
     >
@@ -337,9 +330,7 @@ function DeviceCard({ device, onOpen }: { device: DeviceDTO; onOpen: () => void 
               <p className="truncate text-sm font-semibold">{device.name}</p>
               <p className="flex items-center gap-1 text-xs text-text-muted">
                 <MapPin className="size-3" />
-                <span className="truncate">
-                  {device.location?.name ?? 'Unassigned'}
-                </span>
+                <span className="truncate">{device.location?.name ?? 'Unassigned'}</span>
               </p>
             </div>
             <DeviceStatusBadge status={device.status} size="sm" />
@@ -376,9 +367,7 @@ function DeviceCard({ device, onOpen }: { device: DeviceDTO; onOpen: () => void 
                 </Badge>
               ))}
               {device.tags.length > 4 && (
-                <span className="text-[10px] text-text-muted">
-                  +{device.tags.length - 4}
-                </span>
+                <span className="text-[10px] text-text-muted">+{device.tags.length - 4}</span>
               )}
             </div>
           )}
@@ -388,16 +377,21 @@ function DeviceCard({ device, onOpen }: { device: DeviceDTO; onOpen: () => void 
       {/* Footer action */}
       <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
         <span className="font-mono text-[10px] text-text-muted">{device.id}</span>
-        <Button size="sm" variant="ghost" className="h-7 gap-1 text-xs" onClick={(e) => {
-          e.stopPropagation()
-          onOpen()
-        }}>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 gap-1 text-xs"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen();
+          }}
+        >
           View
           <ChevronRight className="size-3.5" />
         </Button>
       </div>
     </Card>
-  )
+  );
 }
 
 // ─── Skeleton ─────────────────────────────────────────────────────────────────
@@ -426,5 +420,5 @@ function DeviceCardSkeleton() {
         <Skeleton className="h-6 w-16" />
       </div>
     </Card>
-  )
+  );
 }

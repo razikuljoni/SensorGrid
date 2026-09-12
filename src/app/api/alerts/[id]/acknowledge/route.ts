@@ -1,18 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { toAlertEventDTO, ok, error, DEMO_ORG_ID } from '@/lib/api'
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { toAlertEventDTO, ok, error, DEMO_ORG_ID } from '@/lib/api';
 
-export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic';
 
 export async function PATCH(_req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
-  const { id } = await ctx.params
-  const evt = await db.alertEvent.findUnique({ where: { id }, include: { device: true } })
-  if (!evt) return error('Alert event not found', 404)
+  const { id } = await ctx.params;
+  const evt = await db.alertEvent.findUnique({ where: { id }, include: { device: true } });
+  if (!evt) return error('Alert event not found', 404);
   const updated = await db.alertEvent.update({
     where: { id },
-    data: { status: 'ACKNOWLEDGED', acknowledgedAt: new Date(), acknowledgedBy: 'SensorGrid Operator' },
+    data: {
+      status: 'ACKNOWLEDGED',
+      acknowledgedAt: new Date(),
+      acknowledgedBy: 'SensorGrid Operator',
+    },
     include: { device: { select: { id: true, name: true } } },
-  })
+  });
   await db.auditLog.create({
     data: {
       organizationId: DEMO_ORG_ID,
@@ -22,6 +26,6 @@ export async function PATCH(_req: NextRequest, ctx: { params: Promise<{ id: stri
       targetId: id,
       targetName: evt.ruleName,
     },
-  })
-  return ok(toAlertEventDTO(updated))
+  });
+  return ok(toAlertEventDTO(updated));
 }

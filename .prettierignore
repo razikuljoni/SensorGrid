@@ -1,0 +1,16 @@
+.next/
+node_modules/
+build/
+out/
+db/
+*.db
+pnpm-lock.yaml
+bun.lock
+skills-lock.json
+.agents/
+.claude/
+.codegraph/
+.omo/
+.vercel/
+public/screenshots/
+tsconfig.tsbuildinfo

@@ -1,14 +1,14 @@
-'use client'
+'use client';
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Activity, Filter } from 'lucide-react'
-import { SignalTimeline } from '@/components/aether/signal-timeline'
-import { useAuditLog, useRealtimeNotifications } from '@/lib/hooks'
+import * as React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Activity, Filter } from 'lucide-react';
+import { SignalTimeline } from '@/components/aether/signal-timeline';
+import { useAuditLog, useRealtimeNotifications } from '@/lib/hooks';
 
 const ACTION_FILTERS = [
   { value: '', label: 'All' },
@@ -17,24 +17,25 @@ const ACTION_FILTERS = [
   { value: 'alert.', label: 'Alert' },
   { value: 'notification.', label: 'Notification' },
   { value: 'location.', label: 'Location' },
-]
+];
 
 export function ActivityView() {
-  useRealtimeNotifications()
-  const [action, setAction] = React.useState('')
-  const [q, setQ] = React.useState('')
-  const { data, isLoading } = useAuditLog(200, action || undefined)
+  useRealtimeNotifications();
+  const [action, setAction] = React.useState('');
+  const [q, setQ] = React.useState('');
+  const { data, isLoading } = useAuditLog(200, action || undefined);
 
   const filtered = React.useMemo(() => {
-    if (!data) return []
-    if (!q) return data
-    const lower = q.toLowerCase()
-    return data.filter((l: any) =>
-      l.action.toLowerCase().includes(lower) ||
-      l.actorName.toLowerCase().includes(lower) ||
-      (l.targetName ?? '').toLowerCase().includes(lower)
-    )
-  }, [data, q])
+    if (!data) return [];
+    if (!q) return data;
+    const lower = q.toLowerCase();
+    return data.filter(
+      (l: any) =>
+        l.action.toLowerCase().includes(lower) ||
+        l.actorName.toLowerCase().includes(lower) ||
+        (l.targetName ?? '').toLowerCase().includes(lower)
+    );
+  }, [data, q]);
 
   return (
     <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
@@ -44,7 +45,11 @@ export function ActivityView() {
             <CardTitle className="text-base flex items-center gap-2">
               <Activity className="size-4" />
               Activity Log
-              {data && <Badge variant="outline" className="text-[10px] h-5">{data.length} entries</Badge>}
+              {data && (
+                <Badge variant="outline" className="text-[10px] h-5">
+                  {data.length} entries
+                </Badge>
+              )}
             </CardTitle>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -91,5 +96,5 @@ export function ActivityView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

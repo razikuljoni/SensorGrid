@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SensorGrid — Telemetry Explorer View (Task 9)
@@ -6,40 +6,29 @@
 // Driven by useDevices() + useDevice() + useDeviceTelemetry() + realtime socket.
 // ─────────────────────────────────────────────────────────────────────────────
 
-import * as React from 'react'
-import { motion } from 'framer-motion'
-import {
-  Activity,
-  ChevronRight,
-  Radio,
-  RefreshCw,
-  SlidersHorizontal,
-} from 'lucide-react'
+import * as React from 'react';
+import { motion } from 'framer-motion';
+import { Activity, ChevronRight, Radio, RefreshCw, SlidersHorizontal } from 'lucide-react';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+} from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
-import { TelemetryChart } from '@/components/charts/telemetry-chart'
-import { TelemetryTile } from '@/components/aether/telemetry-tile'
+import { TelemetryChart } from '@/components/charts/telemetry-chart';
+import { TelemetryTile } from '@/components/aether/telemetry-tile';
 
-import {
-  useDevice,
-  useDeviceTelemetry,
-  useDevices,
-  useRealtimeNotifications,
-} from '@/lib/hooks'
-import { useRealtimeSocket } from '@/lib/realtime'
-import { formatTime } from '@/lib/status'
-import { cn } from '@/lib/utils'
+import { useDevice, useDeviceTelemetry, useDevices, useRealtimeNotifications } from '@/lib/hooks';
+import { useRealtimeSocket } from '@/lib/realtime';
+import { formatTime } from '@/lib/status';
+import { cn } from '@/lib/utils';
 
 // ─── Ranges ──────────────────────────────────────────────────────────────────
 
@@ -49,73 +38,70 @@ const RANGES: { value: string; label: string }[] = [
   { value: '24h', label: '24h' },
   { value: '7d', label: '7d' },
   { value: '30d', label: '30d' },
-]
+];
 
 // ─── Coerce a twin reported value to a number for the TelemetryTile ──────────
 
 function toNumeric(raw: unknown): number | null {
-  if (typeof raw === 'number' && Number.isFinite(raw)) return raw
-  if (typeof raw === 'boolean') return raw ? 1 : 0
+  if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
+  if (typeof raw === 'boolean') return raw ? 1 : 0;
   if (typeof raw === 'string') {
-    const n = Number(raw)
-    if (Number.isFinite(n)) return n
+    const n = Number(raw);
+    if (Number.isFinite(n)) return n;
   }
-  return null
+  return null;
 }
 
 // ─── View ────────────────────────────────────────────────────────────────────
 
 export default function TelemetryView() {
   // Realtime subscription auto-invalidates the relevant queries on telemetry events.
-  useRealtimeNotifications()
+  useRealtimeNotifications();
 
-  const devices = useDevices()
-  const [deviceId, setDeviceId] = React.useState<string | null>(null)
-  const [sensorKey, setSensorKey] = React.useState<string>('all')
-  const [range, setRange] = React.useState<string>('24h')
+  const devices = useDevices();
+  const [deviceId, setDeviceId] = React.useState<string | null>(null);
+  const [sensorKey, setSensorKey] = React.useState<string>('all');
+  const [range, setRange] = React.useState<string>('24h');
 
   // Auto-pick the first device once the list arrives.
   React.useEffect(() => {
     if (!deviceId && devices.data && devices.data.length > 0) {
-      setDeviceId(devices.data[0].id)
+      setDeviceId(devices.data[0].id);
     }
-  }, [deviceId, devices.data])
+  }, [deviceId, devices.data]);
 
   // Reset sensor filter when the device changes.
   React.useEffect(() => {
-    setSensorKey('all')
-  }, [deviceId])
+    setSensorKey('all');
+  }, [deviceId]);
 
-  const device = useDevice(deviceId)
-  const telemetry = useDeviceTelemetry(
-    deviceId,
-    sensorKey === 'all' ? null : sensorKey,
-    range,
-  )
+  const device = useDevice(deviceId);
+  const telemetry = useDeviceTelemetry(deviceId, sensorKey === 'all' ? null : sensorKey, range);
 
   // ─── "Live" pulse — flashes for ~2.2s after each telemetry event for the selected device.
-  const [live, setLive] = React.useState(false)
-  const liveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [live, setLive] = React.useState(false);
+  const liveTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   useRealtimeSocket((event) => {
     if (event.type === 'device.telemetry' && event.deviceId === deviceId) {
-      setLive(true)
-      if (liveTimer.current) clearTimeout(liveTimer.current)
-      liveTimer.current = setTimeout(() => setLive(false), 2200)
+      setLive(true);
+      if (liveTimer.current) clearTimeout(liveTimer.current);
+      liveTimer.current = setTimeout(() => setLive(false), 2200);
     }
-  })
+  });
   React.useEffect(() => {
     return () => {
-      if (liveTimer.current) clearTimeout(liveTimer.current)
-    }
-  }, [])
+      if (liveTimer.current) clearTimeout(liveTimer.current);
+    };
+  }, []);
 
   // ─── Derived state ─────────────────────────────────────────────────────────
-  const sensors = device.data?.sensors ?? []
-  const reported = (device.data?.twin?.reported ?? {}) as Record<string, unknown>
-  const twinUpdatedAt = device.data?.twin?.updatedAt ?? null
-  const series = telemetry.data?.series ?? []
-  const hasSensors = sensors.length > 0
-  const selectedSensor = sensorKey === 'all' ? null : sensors.find((s) => s.key === sensorKey) ?? null
+  const sensors = device.data?.sensors ?? [];
+  const reported = (device.data?.twin?.reported ?? {}) as Record<string, unknown>;
+  const twinUpdatedAt = device.data?.twin?.updatedAt ?? null;
+  const series = telemetry.data?.series ?? [];
+  const hasSensors = sensors.length > 0;
+  const selectedSensor =
+    sensorKey === 'all' ? null : (sensors.find((s) => s.key === sensorKey) ?? null);
 
   return (
     <div className="flex min-h-screen flex-col gap-4 p-4 sm:gap-6 sm:p-6">
@@ -142,15 +128,11 @@ export default function TelemetryView() {
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Device select */}
           <div className="flex items-center gap-2 min-w-[180px] flex-1">
-            <label className="hidden text-xs font-medium text-text-muted sm:inline">
-              Device
-            </label>
+            <label className="hidden text-xs font-medium text-text-muted sm:inline">Device</label>
             <Select value={deviceId ?? ''} onValueChange={setDeviceId}>
               <SelectTrigger className="w-full sm:w-60" size="sm">
                 <SelectValue
-                  placeholder={
-                    devices.isLoading ? 'Loading devices…' : 'Select a device'
-                  }
+                  placeholder={devices.isLoading ? 'Loading devices…' : 'Select a device'}
                 />
               </SelectTrigger>
               <SelectContent>
@@ -161,9 +143,7 @@ export default function TelemetryView() {
                   </SelectItem>
                 ))}
                 {devices.data && devices.data.length === 0 && (
-                  <div className="px-2 py-1.5 text-xs text-text-muted">
-                    No devices registered.
-                  </div>
+                  <div className="px-2 py-1.5 text-xs text-text-muted">No devices registered.</div>
                 )}
               </SelectContent>
             </Select>
@@ -171,9 +151,7 @@ export default function TelemetryView() {
 
           {/* Sensor select */}
           <div className="flex items-center gap-2 min-w-[160px] flex-1">
-            <label className="hidden text-xs font-medium text-text-muted sm:inline">
-              Sensor
-            </label>
+            <label className="hidden text-xs font-medium text-text-muted sm:inline">Sensor</label>
             <Select
               value={sensorKey}
               onValueChange={setSensorKey}
@@ -197,9 +175,7 @@ export default function TelemetryView() {
           {/* Range selector */}
           <div className="flex items-center gap-2 sm:ml-auto">
             <SlidersHorizontal className="size-3.5 text-text-muted hidden sm:block" />
-            <span className="text-xs font-medium text-text-muted hidden sm:inline">
-              Range
-            </span>
+            <span className="text-xs font-medium text-text-muted hidden sm:inline">Range</span>
             <ToggleGroup
               type="single"
               value={range}
@@ -221,7 +197,7 @@ export default function TelemetryView() {
               'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-medium transition-colors',
               live
                 ? 'border-success/30 bg-success/10 text-success'
-                : 'border-border bg-muted text-text-muted',
+                : 'border-border bg-muted text-text-muted'
             )}
             role="status"
             aria-live="polite"
@@ -233,7 +209,7 @@ export default function TelemetryView() {
               <span
                 className={cn(
                   'relative inline-flex size-1.5 rounded-full',
-                  live ? 'bg-success' : 'bg-muted-foreground/40',
+                  live ? 'bg-success' : 'bg-muted-foreground/40'
                 )}
               />
             </span>
@@ -249,9 +225,7 @@ export default function TelemetryView() {
             <div className="min-w-0">
               <CardTitle className="flex items-center gap-2 text-base">
                 <Activity className="size-4 text-primary" />
-                <span className="truncate">
-                  {device.data ? device.data.name : 'Telemetry'}
-                </span>
+                <span className="truncate">{device.data ? device.data.name : 'Telemetry'}</span>
                 <span className="text-text-muted font-normal text-xs">
                   · {selectedSensor ? selectedSensor.label : 'All sensors'}
                 </span>
@@ -349,5 +323,5 @@ export default function TelemetryView() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
